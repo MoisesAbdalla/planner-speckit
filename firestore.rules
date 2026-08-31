@@ -1,0 +1,107 @@
+rules_version = '2';
+
+// Contrato de segurança — feature 001-routine-finance-planner
+// Princípio II da constituição: cada usuário só lê/escreve os próprios dados.
+// Validações de shape espelham data-model.md; testadas via Firestore Emulator.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isDate(s) {          // YYYY-MM-DD
+      return s is string && s.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    function isMonth(s) {         // YYYY-MM
+      return s is string && s.matches('^\\d{4}-\\d{2}$');
+    }
+
+    function validAmount(a) {
+      return a is int && a > 0;
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedInAs(uid);
+
+      match /transactions/{txId} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.type in ['expense', 'income']
+          && validAmount(request.resource.data.amountCents)
+          && request.resource.data.description is string
+          && request.resource.data.description.size() >= 1
+          && request.resource.data.description.size() <= 120
+          && request.resource.data.categoryId is string
+          && isDate(request.resource.data.date)
+          && isMonth(request.resource.data.month)
+          && request.resource.data.month == request.resource.data.date[0:7]
+          && request.resource.data.status in ['planned', 'confirmed']
+          && request.resource.data.source in ['manual', 'recurrence']
+          && (request.resource.data.source != 'recurrence'
+              || request.resource.data.recurrenceId is string);
+      }
+
+      match /recurrences/{recId} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.type in ['expense', 'income']
+          && validAmount(request.resource.data.amountCents)
+          && request.resource.data.description is string
+          && request.resource.data.description.size() >= 1
+          && request.resource.data.description.size() <= 120
+          && request.resource.data.dayOfMonth is int
+          && request.resource.data.dayOfMonth >= 1
+          && request.resource.data.dayOfMonth <= 31
+          && isMonth(request.resource.data.startMonth)
+          && (request.resource.data.endMonth == null
+              || isMonth(request.resource.data.endMonth));
+      }
+
+      match /categories/{catId} {
+        allow read: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 1
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.kind in ['expense', 'income', 'both']
+          && request.resource.data.archived is bool;
+        // Sem delete: categorias são arquivadas, preservando histórico.
+        allow delete: if false;
+      }
+
+      match /tasks/{taskId} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.title is string
+          && request.resource.data.title.size() >= 1
+          && request.resource.data.title.size() <= 120;
+      }
+
+      match /taskOverrides/{overrideId} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.taskId is string
+          && isDate(request.resource.data.date)
+          && overrideId == request.resource.data.taskId + '_' + request.resource.data.date;
+      }
+
+      match /monthStats/{month} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && isMonth(month)
+          && request.resource.data.incomeCents is int
+          && request.resource.data.expenseCents is int
+          && request.resource.data.incomeCents >= 0
+          && request.resource.data.expenseCents >= 0;
+      }
+    }
+
+    // Qualquer outro caminho: negado.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
