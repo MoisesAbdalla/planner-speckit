@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Planner">
+  <rect width="64" height="64" rx="14" fill="#16211D" />
+  <!-- Linha efetivada: fio contínuo -->
+  <rect x="14" y="22" width="36" height="3.5" rx="1.75" fill="#FBF9F5" />
+  <!-- Linha prevista: fio interrompido -->
+  <rect x="14" y="33" width="14" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
+  <rect x="32" y="33" width="8" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
+  <!-- Marca de entrada -->
+  <rect x="14" y="44" width="20" height="3.5" rx="1.75" fill="#4FA98F" />
+</svg>

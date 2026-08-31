@@ -1,0 +1,16 @@
+{
+  "name": "Planner",
+  "short_name": "Planner",
+  "description": "Planner de rotina com gestor financeiro pessoal.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf9f5",
+  "theme_color": "#fbf9f5",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

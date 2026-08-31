@@ -1,0 +1,147 @@
+@import 'tailwindcss';
+
+/*
+  Sistema de design "Caderneta".
+
+  A referência é o caderno de contas: uma coluna de valores alinhados sobre
+  fios finos. Daí vêm as três decisões que sustentam tudo:
+
+  1. Fio (rule) é o elemento estrutural — separa lançamentos sem caixas.
+  2. Figuras tabulares em monoespaçada — valores alinham na mesma coluna.
+  3. Previsto x efetivado é estrutura, não emblema: fio tracejado e figura
+     em peso leve para o que ainda não aconteceu.
+*/
+
+@theme {
+  /* — Cor ————————————————————————————————————— */
+  /* Contraste sobre --color-paper: ink 15.6:1, ink-soft 5.4:1, ink-faint 4.7:1.
+     Nenhum texto fica abaixo de 4.5:1 — inclusive os rótulos pequenos. */
+  --color-ink: #16211d;
+  --color-ink-soft: #5a6a64;
+  --color-ink-faint: #67736d;
+
+  --color-paper: #fbf9f5;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunken: #f3f0ea;
+
+  --color-rule: #dfdcd3;
+  --color-rule-strong: #c6c2b6;
+
+  /* Semânticas financeiras: entrada e saída nunca compartilham a cor de ação */
+  --color-entrada: #1f6f5c;
+  --color-entrada-wash: #e6f0ec;
+  --color-saida: #8c3b4a;
+  --color-saida-wash: #f6eaec;
+
+  /* Ação/interativo — distinto das semânticas, para clique nunca virar valor */
+  --color-acao: #2f4b7c;
+  --color-acao-hover: #243a61;
+  --color-acao-wash: #e9edf5;
+
+  /* Atenção: atrasado, vencido */
+  --color-atencao: #8a5f1c;
+  --color-atencao-wash: #f6efe2;
+
+  /* — Tipografia ——————————————————————————————— */
+  --font-display: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
+  --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  --text-micro: 0.6875rem; /* 11px — rótulos de coluna */
+  --text-micro--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.375rem;
+
+  /* — Forma ———————————————————————————————————— */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --shadow-raised: 0 1px 2px rgb(22 33 29 / 0.05), 0 1px 1px rgb(22 33 29 / 0.04);
+  --shadow-float: 0 8px 24px rgb(22 33 29 / 0.1), 0 2px 6px rgb(22 33 29 / 0.06);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Números sempre alinham na mesma largura — a coluna do razão só funciona assim. */
+  .figures {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    letter-spacing: -0.01em;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Piso de qualidade: foco sempre visível, e visível sobre qualquer fundo. */
+  :focus-visible {
+    outline: 2px solid var(--color-acao);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility ledger-rule {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* A assinatura: o que ainda não aconteceu tem o fio interrompido. */
+@utility ledger-rule-planned {
+  border-bottom: 1px dashed var(--color-rule-strong);
+}
