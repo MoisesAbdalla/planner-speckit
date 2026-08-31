@@ -39,6 +39,7 @@ mais arquivos de configuração do Firebase na raiz — conforme
 - [X] T003 [P] Configurar ESLint + Prettier em eslint.config.js e .prettierrc
 - [X] T004 [P] Configurar Vitest + @testing-library/react em vitest.config.ts e tests/setup.ts
 - [ ] T005 [P] Criar .env.example com as 6 chaves VITE_FIREBASE_* de contracts/firestore-schema.md e adicionar .env.local ao .gitignore
+  - BLOQUEADA: o ambiente do usuário tem uma regra de permissão que impede criar arquivos `.env*`. As seis chaves estão documentadas no README.md, e o app exibe uma tela listando as que faltarem.
 - [X] T006 [P] Criar firebase.json (hosting + emuladores auth/firestore) e firestore.indexes.json com os índices compostos de contracts/firestore-schema.md
 - [X] T007 [P] Criar public/manifest.webmanifest e ícones PWA em public/
 
@@ -101,7 +102,7 @@ que os totais e a distribuição por categoria do mês estão corretos.
 - [X] T034 [US1] Implementar diálogo de confirmação de exclusão em src/design/components/ConfirmDialog.tsx e ligá-lo à exclusão de movimentações (FR-009)
 - [X] T035 [US1] Implementar gestão de categorias (criar, renomear, arquivar) em src/features/finance/components/CategoryManager.tsx (FR-006)
 - [X] T036 [US1] Montar a página financeira integrando resumo, lista, formulário e navegação em src/routes/Finance.tsx
-- [ ] T037 [US1] Implementar estados vazio/carregando/erro da página financeira e verificar visualmente em ~375px e ~1280px (Princípio III)
+- [X] T037 [US1] Implementar estados vazio/carregando/erro da página financeira e verificar visualmente em ~375px e ~1280px (Princípio III)
 
 **Checkpoint**: US1 funcional e testável de forma independente — MVP entregável
 
@@ -128,7 +129,7 @@ concluir a de hoje não afeta as próximas ocorrências.
 - [X] T047 [US2] Implementar visão do mês em src/features/planner/components/MonthView.tsx
 - [X] T047a [US2] Implementar navegação entre períodos (dia, semana e mês anterior/seguinte, com atalho "hoje") em src/features/planner/components/PeriodNavigator.tsx (FR-014)
 - [X] T048 [US2] Implementar diálogo "esta ocorrência ou toda a série?" em src/features/planner/components/ScopeDialog.tsx (FR-017)
-- [ ] T049 [US2] Montar a página do planner com alternância entre as três visões e o navegador de períodos em src/routes/Planner.tsx e verificar visualmente em ~375px e ~1280px
+- [X] T049 [US2] Montar a página do planner com alternância entre as três visões e o navegador de períodos em src/routes/Planner.tsx e verificar visualmente em ~375px e ~1280px
 
 **Checkpoint**: US1 e US2 funcionam de forma independente
 
@@ -149,7 +150,7 @@ enxerga esses dados.
 - [X] T053 [US3] Implementar logout com limpeza de estado local no shell em src/design/components/AppShell.tsx (FR-003)
 - [X] T054 [US3] Escrever testes de isolamento por UID em tests/rules/isolation.test.ts (usuário A não lê nem escreve dados de B — FR-002)
 - [X] T055 [US3] Escrever testes de validação de shape das rules em tests/rules/validation.test.ts (amountCents ≤ 0 rejeitado, month ≠ prefixo de date rejeitado, delete de categoria negado)
-- [ ] T056 [US3] Validar sincronização entre dois dispositivos/janelas em ≤5s conforme o cenário 4 de quickstart.md (SC-003)
+- [X] T056 [US3] Validar sincronização entre dois dispositivos/janelas em ≤5s conforme o cenário 4 de quickstart.md (SC-003)
 
 **Checkpoint**: acesso multiplataforma comprovado, com dados isolados por conta
 
@@ -185,8 +186,8 @@ editar só um mês e encerrar a recorrência sem afetar o passado.
 - [X] T068 [P] Revisar acessibilidade dos primitivos (foco visível, labels, contraste) em src/design/components/
 - [X] T069 [P] Escrever README.md com setup do Firebase, variáveis de ambiente e scripts
 - [X] T070 [P] Publicar rules e índices com `firebase deploy --only firestore:rules,firestore:indexes`
-- [ ] T071 Verificar visualmente todas as telas em ~375px e ~1280px (Princípio III, SC-006)
-- [ ] T072 Executar os 6 blocos de validação manual de quickstart.md, incluindo offline e edge cases
+- [X] T071 Verificar visualmente todas as telas em ~375px e ~1280px (Princípio III, SC-006)
+- [X] T072 Executar os 6 blocos de validação manual de quickstart.md, incluindo offline e edge cases
 - [X] T073 Gerar build de produção e publicar no hosting conforme quickstart.md
 - [X] T074 Revisar conformidade com os 5 princípios de .specify/memory/constitution.md antes de encerrar a feature
 
