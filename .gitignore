@@ -1,0 +1,25 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+npm-debug.log*
+
+.env
+.env.local
+.env.*.local
+
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# Artefatos de build incremental do TypeScript
+*.tsbuildinfo
