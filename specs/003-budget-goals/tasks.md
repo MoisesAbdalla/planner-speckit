@@ -125,7 +125,7 @@ nenhum mês passado.
 - [ ] T028 Verificar os três estados em escala de cinza e sob deuteranopia no DevTools, sobre src/features/finance/components/MonthSummary.tsx e CategoryBreakdown.tsx (SC-007)
 - [ ] T029 Percorrer as telas nas quatro combinações — tema claro e escuro × ~375px e ~1280px — conferindo o modal de metas e os dois pontos de exibição
 - [ ] T030 Executar os quatro blocos de validação manual de quickstart.md
-- [ ] T031 Publicar as regras **antes** do hosting (`firebase deploy --only firestore:rules` e depois `--only hosting`), porque a versão nova do app escreve numa subcoleção que as regras antigas recusam
+- [X] T031 Publicar as regras **antes** do hosting (`firebase deploy --only firestore:rules` e depois `--only hosting`), porque a versão nova do app escreve numa subcoleção que as regras antigas recusam
 
 ---
 
