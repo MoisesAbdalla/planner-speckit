@@ -87,17 +87,17 @@ comparação com meses anteriores e a distinção previsto/efetivado.
 ao menos um previsto, e conferir que a leitura visual corresponde aos valores;
 identificar a categoria dominante em até 3 segundos sem ler números.
 
-- [ ] T018 [P] [US2] Implementar a série mensal pura em src/features/finance/lib/monthSeries.ts: até 6 meses terminando no mês visualizado, meses sem registro com zeros, e a escala a partir do maior valor absoluto (data-model.md)
-- [ ] T019 [P] [US2] Escrever testes da série mensal em tests/unit/monthSeries.test.ts (horizonte de 6 meses, virada de ano, meses ausentes preenchidos com zero, série toda zerada, saldo negativo)
-- [ ] T020 [P] [US2] Implementar a dobra da distribuição por categoria em src/features/finance/lib/categoryBreakdown.ts: no máximo 6 nominais, o restante somado em "Outros", slot de cor estável por categoria, e a soma das fatias igual ao total de saídas
-- [ ] T021 [P] [US2] Escrever testes da dobra em tests/unit/categoryBreakdown.test.ts (7 ou mais categorias dobram corretamente; a soma fecha com o total; reordenar por valor não troca as cores; categoria única com 100%)
-- [ ] T022 [P] [US2] Implementar o medidor em src/design/components/charts/Meter.tsx: proporção do que saiu sobre o que entrou, extensão do previsto em peso leve, estado de excesso quando a saída supera a entrada, divisão por zero tratada, e rótulo textual acessível declarando a proporção em palavras (FR-013)
-- [ ] T023 [P] [US2] Implementar a barra horizontal em src/design/components/charts/BarRow.tsx com rótulo direto, ponta arredondada de 4px ancorada na linha de base e vão de 2px na cor da superfície (contracts/design-tokens.md)
-- [ ] T024 [P] [US2] Implementar as colunas mensais em src/design/components/charts/MonthColumns.tsx usando ênfase — o mês em foco na cor de ação e os anteriores recessivos (research R2), sem eixo duplo
-- [ ] T025 [US2] Compor a distribuição por categoria em src/features/finance/components/CategoryBreakdown.tsx, ordenada da maior para a menor, com rótulo direto e lista textual equivalente (FR-013)
-- [ ] T026 [US2] Compor a comparação entre meses em src/features/finance/components/MonthTrend.tsx a partir dos `monthStats` já lidos, sem nenhuma leitura nova do Firestore, com equivalente textual dos valores de cada mês (FR-013)
-- [ ] T027 [US2] Reorganizar src/features/finance/components/MonthSummary.tsx para liderar pela leitura visual, mantendo os valores em figuras tabulares e o saldo acumulado como número secundário
-- [ ] T028 [US2] Implementar o estado vazio de cada visualização (mês sem movimentação, histórico insuficiente para comparar) em src/features/finance/components/, sem gráfico quebrado nem área em branco (FR-014)
+- [X] T018 [P] [US2] Implementar a série mensal pura em src/features/finance/lib/monthSeries.ts: até 6 meses terminando no mês visualizado, meses sem registro com zeros, e a escala a partir do maior valor absoluto (data-model.md)
+- [X] T019 [P] [US2] Escrever testes da série mensal em tests/unit/monthSeries.test.ts (horizonte de 6 meses, virada de ano, meses ausentes preenchidos com zero, série toda zerada, saldo negativo)
+- [X] T020 [P] [US2] Implementar a dobra da distribuição por categoria em src/features/finance/lib/categoryBreakdown.ts: no máximo 6 nominais, o restante somado em "Outros", slot de cor estável por categoria, e a soma das fatias igual ao total de saídas
+- [X] T021 [P] [US2] Escrever testes da dobra em tests/unit/categoryBreakdown.test.ts (7 ou mais categorias dobram corretamente; a soma fecha com o total; reordenar por valor não troca as cores; categoria única com 100%)
+- [X] T022 [P] [US2] Implementar o medidor em src/design/components/charts/Meter.tsx: proporção do que saiu sobre o que entrou, extensão do previsto em peso leve, estado de excesso quando a saída supera a entrada, divisão por zero tratada, e rótulo textual acessível declarando a proporção em palavras (FR-013)
+- [X] T023 [P] [US2] Implementar a barra horizontal em src/design/components/charts/BarRow.tsx com rótulo direto, ponta arredondada de 4px ancorada na linha de base e vão de 2px na cor da superfície (contracts/design-tokens.md)
+- [X] T024 [P] [US2] Implementar as colunas mensais em src/design/components/charts/MonthColumns.tsx usando ênfase — o mês em foco na cor de ação e os anteriores recessivos (research R2), sem eixo duplo
+- [X] T025 [US2] Compor a distribuição por categoria em src/features/finance/components/CategoryBreakdown.tsx, ordenada da maior para a menor, com rótulo direto e lista textual equivalente (FR-013)
+- [X] T026 [US2] Compor a comparação entre meses em src/features/finance/components/MonthTrend.tsx a partir dos `monthStats` já lidos, sem nenhuma leitura nova do Firestore, com equivalente textual dos valores de cada mês (FR-013)
+- [X] T027 [US2] Reorganizar src/features/finance/components/MonthSummary.tsx para liderar pela leitura visual, mantendo os valores em figuras tabulares e o saldo acumulado como número secundário
+- [X] T028 [US2] Implementar o estado vazio de cada visualização (mês sem movimentação, histórico insuficiente para comparar) em src/features/finance/components/, sem gráfico quebrado nem área em branco (FR-014)
 - [ ] T029 [US2] Conferir em ~375px os casos-limite das visualizações de src/features/finance/components/: categoria única com 100%, um gasto muito maior que os demais, e conteúdo largo rolando dentro da própria área
 
 **Checkpoint**: US1 e US2 funcionam de forma independente

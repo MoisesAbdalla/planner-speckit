@@ -36,13 +36,19 @@ export function useAccumulated(uid: string, upToMonth: ISOMonth) {
     ),
   );
 
-  const accumulatedCents = useMemo(() => {
+  // O mesmo mapa serve ao acumulado e à comparação entre meses — uma leitura só.
+  const stats = useMemo(() => {
     const byMonth: Record<ISOMonth, MonthStats> = {};
     data.forEach(({ id, incomeCents, expenseCents }) => {
       byMonth[id] = { incomeCents, expenseCents };
     });
-    return accumulatedBalance(byMonth, upToMonth);
-  }, [data, upToMonth]);
+    return byMonth;
+  }, [data]);
 
-  return { accumulatedCents, hasHistory: data.length > 0, loading };
+  const accumulatedCents = useMemo(
+    () => accumulatedBalance(stats, upToMonth),
+    [stats, upToMonth],
+  );
+
+  return { accumulatedCents, stats, hasHistory: data.length > 0, loading };
 }

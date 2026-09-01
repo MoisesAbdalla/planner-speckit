@@ -31,7 +31,7 @@ export function FinancePage() {
 
   const { transactions, loading, error } = useTransactions(uid, month);
   const { categories, loading: loadingCategories } = useCategories(uid);
-  const { accumulatedCents, hasHistory } = useAccumulated(uid, month);
+  const { accumulatedCents, stats, hasHistory } = useAccumulated(uid, month);
   const { recurrences, active: activeRecurrences } = useRecurrences(uid);
 
   useMaterialization(uid, activeRecurrences, month, !loadingCategories);
@@ -89,6 +89,8 @@ export function FinancePage() {
         summary={summary}
         accumulatedCents={accumulatedCents}
         hasHistory={hasHistory}
+        stats={stats}
+        month={month}
       />
 
       <section>
