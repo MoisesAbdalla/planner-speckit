@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { materializeHorizon, materializeMonth } from '../lib/materializeRecurrences';
+import { resolveFrequency } from '../lib/recurrenceRules';
 import type { ISOMonth } from '../../../shared/dates';
 import type { Recurrence } from '../types';
 
@@ -22,7 +23,22 @@ export function useMaterialization(
   useEffect(() => {
     if (!ready || recurrences.length === 0) return;
 
-    const signature = recurrences.map((r) => `${r.id}:${r.endMonth ?? ''}`).join('|');
+    // A assinatura precisa incluir os campos de repetição: sem eles, trocar
+    // terça por quinta não geraria as ocorrências novas até recarregar a
+    // página, porque o mês já constaria como preparado.
+    const signature = recurrences
+      .map((r) =>
+        [
+          r.id,
+          resolveFrequency(r),
+          r.dayOfMonth,
+          r.weekday ?? '',
+          r.monthOfYear ?? '',
+          r.endMonth ?? '',
+          (r.skips ?? []).length,
+        ].join(':'),
+      )
+      .join('|');
 
     if (!horizonDone.current) {
       horizonDone.current = true;

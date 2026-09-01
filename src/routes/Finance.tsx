@@ -176,7 +176,14 @@ export function FinancePage() {
             : ''
         }
         onConfirm={() => {
-          if (deleting) deleteTransaction(uid, deleting).catch(console.error);
+          if (deleting) {
+            // A recorrência vai junto para o descarte ser registrado nela —
+            // senão o previsto excluído voltaria na próxima materialização.
+            const origem = deleting.recurrenceId
+              ? recurrences.find((r) => r.id === deleting.recurrenceId)
+              : undefined;
+            deleteTransaction(uid, deleting, origem).catch(console.error);
+          }
           setDeleting(null);
         }}
         onCancel={() => setDeleting(null)}

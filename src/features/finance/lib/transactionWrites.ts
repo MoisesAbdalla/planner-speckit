@@ -1,6 +1,14 @@
-import { collection, doc, increment, serverTimestamp, writeBatch } from 'firebase/firestore';
+import {
+  arrayUnion,
+  collection,
+  doc,
+  increment,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore';
 import { db } from '../../../firebase';
-import type { MonthStats, Transaction, TransactionDraft } from '../types';
+import type { MonthStats, Recurrence, Transaction, TransactionDraft } from '../types';
+import { occurrenceKeyOf } from './recurrenceRules';
 import { statsDelta } from './summary';
 import { monthOf, type ISOMonth } from '../../../shared/dates';
 
@@ -77,10 +85,31 @@ export async function updateTransaction(
   await batch.commit();
 }
 
-export async function deleteTransaction(uid: string, before: Transaction): Promise<void> {
+/**
+ * Exclui uma movimentação.
+ *
+ * Quando ela veio de uma recorrência, o descarte daquela ocorrência é
+ * registrado **na mesma batch**. Sem isso, a geração compararia os candidatos
+ * com o que existe, não encontraria o documento apagado e o recriaria — excluir
+ * o aluguel previsto o traria de volta na próxima vez que o mês fosse
+ * preparado (FR-012).
+ */
+export async function deleteTransaction(
+  uid: string,
+  before: Transaction,
+  recurrence?: Recurrence,
+): Promise<void> {
   const batch = writeBatch(db);
   batch.delete(txDoc(uid, before.id));
   applyStats(batch, uid, before.month, statsDelta(before, null));
+
+  if (before.source === 'recurrence' && before.recurrenceId && recurrence) {
+    batch.update(doc(db, 'users', uid, 'recurrences', before.recurrenceId), {
+      skips: arrayUnion(occurrenceKeyOf(recurrence, before.date)),
+      updatedAt: serverTimestamp(),
+    });
+  }
+
   await batch.commit();
 }
 

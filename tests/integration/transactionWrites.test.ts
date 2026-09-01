@@ -1,6 +1,14 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+} from 'firebase/firestore';
 import { auth, db } from '../../src/firebase';
 import {
   createTransaction,
@@ -134,5 +142,120 @@ describe('recorrência materializada', () => {
     const doMes = await getDocs(collection(db, 'users', uid, 'transactions'));
     const deDezembro = doMes.docs.filter((d) => d.data().month === '2026-12');
     expect(deDezembro).toHaveLength(1);
+  });
+});
+
+describe('a recorrência semanal precisa aparecer na consulta', () => {
+  /**
+   * Este teste existe por causa de um defeito concreto: a consulta ordenava por
+   * `dayOfMonth`, e o Firestore **omite do resultado** todo documento que não
+   * tem o campo ordenado. Uma recorrência semanal, que não usa dia do mês,
+   * simplesmente não voltava — cadastrada com sucesso e invisível para sempre.
+   */
+  it('a recorrência sem dayOfMonth volta na consulta que o app usa', async () => {
+    await setDoc(doc(db, 'users', uid, 'recurrences', 'feira'), {
+      type: 'expense',
+      amountCents: 8000,
+      description: 'Feira',
+      categoryId: 'cat-alimentacao',
+      frequency: 'weekly',
+      weekday: 2,
+      startMonth: '2027-03',
+      endMonth: null,
+    });
+
+    const semOrdenacao = await getDocs(collection(db, 'users', uid, 'recurrences'));
+    expect(semOrdenacao.docs.map((d) => d.id)).toContain('feira');
+  });
+
+  it('e a consulta ordenada por dayOfMonth a perderia — a razão de não ordenar', async () => {
+    const ordenada = await getDocs(
+      query(collection(db, 'users', uid, 'recurrences'), orderBy('dayOfMonth')),
+    );
+    expect(ordenada.docs.map((d) => d.id)).not.toContain('feira');
+  });
+
+  it('materializa as cinco ocorrências do mês e não repete na segunda rodada', async () => {
+    const feira: Recurrence = {
+      id: 'feira',
+      type: 'expense',
+      amountCents: 8000,
+      description: 'Feira',
+      categoryId: 'cat-alimentacao',
+      frequency: 'weekly',
+      weekday: 2,
+      dayOfMonth: 1,
+      startMonth: '2027-03',
+      endMonth: null,
+    };
+
+    // Março de 2027 tem cinco terças.
+    expect(await materializeMonth(uid, [feira], '2027-03')).toBe(5);
+    expect(await materializeMonth(uid, [feira], '2027-03')).toBe(0);
+
+    const todas = await getDocs(collection(db, 'users', uid, 'transactions'));
+    const deMarco = todas.docs.filter((d) => d.data().month === '2027-03');
+    expect(deMarco).toHaveLength(5);
+    expect(deMarco.map((d) => d.id).sort()).toEqual([
+      'rec_feira_2027-03-02',
+      'rec_feira_2027-03-09',
+      'rec_feira_2027-03-16',
+      'rec_feira_2027-03-23',
+      'rec_feira_2027-03-30',
+    ]);
+  });
+
+  it('excluir uma ocorrência registra o descarte e ela não volta', async () => {
+    const feira: Recurrence = {
+      id: 'feira',
+      type: 'expense',
+      amountCents: 8000,
+      description: 'Feira',
+      categoryId: 'cat-alimentacao',
+      frequency: 'weekly',
+      weekday: 2,
+      dayOfMonth: 1,
+      startMonth: '2027-03',
+      endMonth: null,
+    };
+
+    const alvo = 'rec_feira_2027-03-16';
+    const tx = {
+      id: alvo,
+      ...(await getDoc(doc(db, 'users', uid, 'transactions', alvo))).data(),
+    } as Transaction;
+
+    await deleteTransaction(uid, tx, feira);
+
+    const gravada = await getDoc(doc(db, 'users', uid, 'recurrences', 'feira'));
+    expect(gravada.data()!.skips).toContain('2027-03-16');
+
+    // Materializar de novo com a recorrência atualizada não a recria.
+    const atualizada = { ...feira, skips: gravada.data()!.skips as string[] };
+    expect(await materializeMonth(uid, [atualizada], '2027-03')).toBe(0);
+    expect((await getDoc(doc(db, 'users', uid, 'transactions', alvo))).exists()).toBe(false);
+  });
+
+  it('a anual cria um único previsto, no mês certo', async () => {
+    const ipva: Recurrence = {
+      id: 'ipva',
+      type: 'expense',
+      amountCents: 90000,
+      description: 'IPVA',
+      categoryId: 'cat-transporte',
+      frequency: 'yearly',
+      dayOfMonth: 15,
+      monthOfYear: 1,
+      startMonth: '2027-04',
+      endMonth: null,
+    };
+
+    expect(await materializeMonth(uid, [ipva], '2027-06')).toBe(0);
+    expect(await materializeMonth(uid, [ipva], '2028-01')).toBe(1);
+
+    const previsto = await getDoc(doc(db, 'users', uid, 'transactions', 'rec_ipva_2028-01'));
+    expect(previsto.exists()).toBe(true);
+    expect(previsto.data()!.date).toBe('2028-01-15');
+    expect(previsto.data()!.status).toBe('planned');
   });
 });

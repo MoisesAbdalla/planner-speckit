@@ -52,12 +52,33 @@ service cloud.firestore {
           && request.resource.data.description is string
           && request.resource.data.description.size() >= 1
           && request.resource.data.description.size() <= 120
-          && request.resource.data.dayOfMonth is int
-          && request.resource.data.dayOfMonth >= 1
-          && request.resource.data.dayOfMonth <= 31
           && isMonth(request.resource.data.startMonth)
           && (request.resource.data.endMonth == null
-              || isMonth(request.resource.data.endMonth));
+              || isMonth(request.resource.data.endMonth))
+          && (!('frequency' in request.resource.data)
+              || request.resource.data.frequency in ['weekly', 'monthly', 'yearly'])
+          // Semanal: exige o dia da semana e nao tem dia do mes.
+          && (request.resource.data.get('frequency', 'monthly') != 'weekly'
+              || (request.resource.data.weekday is int
+                  && request.resource.data.weekday >= 1
+                  && request.resource.data.weekday <= 7))
+          // Mensal e anual: exigem o dia do mes, como ja era. O
+          // get('frequency', 'monthly') e o que mantem a validacao antiga
+          // valendo para os documentos gravados sem o campo — sem ele,
+          // encerrar uma recorrencia antiga passaria a ser recusado.
+          && (request.resource.data.get('frequency', 'monthly') == 'weekly'
+              || (request.resource.data.dayOfMonth is int
+                  && request.resource.data.dayOfMonth >= 1
+                  && request.resource.data.dayOfMonth <= 31))
+          // Anual: exige tambem o mes.
+          && (request.resource.data.get('frequency', 'monthly') != 'yearly'
+              || (request.resource.data.monthOfYear is int
+                  && request.resource.data.monthOfYear >= 1
+                  && request.resource.data.monthOfYear <= 12))
+          // Descartes de ocorrencia: lista, presente ou nao, com teto.
+          && (!('skips' in request.resource.data)
+              || (request.resource.data.skips is list
+                  && request.resource.data.skips.size() <= 500));
       }
 
       match /categories/{catId} {

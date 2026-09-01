@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { ISODate, ISOMonth } from '../../shared/dates';
+import type { ISODate, ISOMonth, Weekday } from '../../shared/dates';
 
 export type MovementType = 'expense' | 'income';
 
@@ -46,14 +46,38 @@ export interface Category {
   sortOrder: number;
 }
 
+/** Com que ritmo uma recorrência acontece. */
+export type RecurrenceFrequency = 'weekly' | 'monthly' | 'yearly';
+
 export interface Recurrence {
   id: string;
   type: MovementType;
   amountCents: number;
   description: string;
   categoryId: string;
-  /** 1–31; meses curtos recebem o clamp para o último dia. */
+  /**
+   * **Ausente significa mensal.**
+   *
+   * É o que faz toda recorrência gravada antes desta feature continuar
+   * funcionando sem migração: nenhum documento precisou ser reescrito. Só
+   * `resolveFrequency` em `lib/recurrenceRules.ts` lê este campo — em
+   * qualquer outro lugar, use aquela função.
+   */
+  frequency?: RecurrenceFrequency;
+  /** 1–31; meses curtos recebem o clamp para o último dia. Mensal e anual. */
   dayOfMonth: number;
+  /** Só na semanal. Mesma convenção do planner: 1 = segunda, 7 = domingo. */
+  weekday?: Weekday;
+  /** Só na anual: 1–12. */
+  monthOfYear?: number;
+  /**
+   * Ocorrências que a pessoa excluiu, pela chave que a geração produziria.
+   *
+   * Sem isso, excluir um previsto o traz de volta na materialização seguinte:
+   * a geração compara os candidatos com o que **existe**, e um documento
+   * apagado deixa de existir.
+   */
+  skips?: string[];
   startMonth: ISOMonth;
   /** `null` = ativa. Encerrar grava o último mês que ainda gera lançamento. */
   endMonth: ISOMonth | null;

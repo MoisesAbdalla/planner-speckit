@@ -5,8 +5,22 @@ import { Button } from '../../../design/components/Button';
 import { Input, Select } from '../../../design/components/Field';
 import { Modal } from '../../../design/components/Modal';
 import { centsToInputValue, isValidAmount, parseAmountToCents } from '../../../shared/money';
-import { currentMonth } from '../../../shared/dates';
-import type { Category, MovementType, Recurrence } from '../types';
+import { currentMonth, WEEKDAY_LABELS, type Weekday } from '../../../shared/dates';
+import type { Category, MovementType, Recurrence, RecurrenceFrequency } from '../types';
+import { resolveFrequency } from '../lib/recurrenceRules';
+
+const FREQUENCIAS: { value: RecurrenceFrequency; label: string }[] = [
+  { value: 'weekly', label: 'Toda semana' },
+  { value: 'monthly', label: 'Todo mês' },
+  { value: 'yearly', label: 'Uma vez por ano' },
+];
+
+const MESES = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
+const DIAS_DA_SEMANA: Weekday[] = [1, 2, 3, 4, 5, 6, 7];
 
 interface RecurrenceFormProps {
   open: boolean;
@@ -22,6 +36,12 @@ function Body({ uid, categories, editing, onClose }: RecurrenceFormProps) {
   const [description, setDescription] = useState(editing?.description ?? '');
   const [chosenCategory, setChosenCategory] = useState(editing?.categoryId ?? '');
   const [dayOfMonth, setDayOfMonth] = useState(String(editing?.dayOfMonth ?? 5));
+  // Mensal é o padrão: quem só quer o que já existia não paga interação nenhuma.
+  const [frequency, setFrequency] = useState<RecurrenceFrequency>(
+    editing ? resolveFrequency(editing) : 'monthly',
+  );
+  const [weekday, setWeekday] = useState<Weekday>(editing?.weekday ?? 2);
+  const [monthOfYear, setMonthOfYear] = useState(String(editing?.monthOfYear ?? 1));
   const [error, setError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -40,8 +60,13 @@ function Body({ uid, categories, editing, onClose }: RecurrenceFormProps) {
       return;
     }
     const day = Number(dayOfMonth);
-    if (!Number.isInteger(day) || day < 1 || day > 31) {
+    if (frequency !== 'weekly' && (!Number.isInteger(day) || day < 1 || day > 31)) {
       setSaveError('O dia precisa estar entre 1 e 31.');
+      return;
+    }
+    const mes = Number(monthOfYear);
+    if (frequency === 'yearly' && (!Number.isInteger(mes) || mes < 1 || mes > 12)) {
+      setSaveError('Escolha um mês válido.');
       return;
     }
     if (!categoryId) {
@@ -52,12 +77,19 @@ function Body({ uid, categories, editing, onClose }: RecurrenceFormProps) {
     setSaving(true);
     setSaveError(null);
     try {
+      // Só os campos da frequência escolhida são gravados. Os de outra
+      // frequência podem sobrar de uma edição anterior e são ignorados na
+      // leitura — nunca motivo para recusar a escrita.
       const payload = {
         type,
         amountCents: cents,
-        description: description.trim() || (type === 'expense' ? 'Conta mensal' : 'Receita mensal'),
+        description:
+          description.trim() || (type === 'expense' ? 'Conta a pagar' : 'Receita'),
         categoryId,
-        dayOfMonth: day,
+        frequency,
+        dayOfMonth: frequency === 'weekly' ? 1 : day,
+        ...(frequency === 'weekly' ? { weekday } : {}),
+        ...(frequency === 'yearly' ? { monthOfYear: mes } : {}),
         updatedAt: serverTimestamp(),
       };
 
@@ -165,17 +197,82 @@ function Body({ uid, categories, editing, onClose }: RecurrenceFormProps) {
           ))}
         </Select>
 
-        <Input
-          label="Dia do mês"
-          type="number"
-          min={1}
-          max={31}
-          figures
-          required
-          value={dayOfMonth}
-          onChange={(e) => setDayOfMonth(e.target.value)}
-          hint="Em meses mais curtos, cai no último dia."
-        />
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-medium text-ink">Com que frequência</legend>
+          <div className="grid grid-cols-3 gap-1 rounded-sm bg-paper-sunken p-1">
+            {FREQUENCIAS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={frequency === option.value}
+                onClick={() => setFrequency(option.value)}
+                className={`rounded-sm px-2 py-2 text-xs font-medium transition-colors duration-[--ease-snap] ${
+                  frequency === option.value
+                    ? 'bg-paper-raised text-ink shadow-raised'
+                    : 'text-ink-soft'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* Só os campos da frequência escolhida aparecem — trocar a
+            frequência troca os campos, sem deixar visível o que não vale. */}
+        {frequency === 'weekly' && (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-sm font-medium text-ink">Em qual dia</legend>
+            <div className="flex gap-1">
+              {DIAS_DA_SEMANA.map((dia) => (
+                <button
+                  key={dia}
+                  type="button"
+                  role="radio"
+                  aria-checked={weekday === dia}
+                  onClick={() => setWeekday(dia)}
+                  className={`h-9 flex-1 rounded-sm border text-xs font-medium transition-colors duration-[--ease-snap] ${
+                    weekday === dia
+                      ? 'border-acao bg-acao-wash text-acao'
+                      : 'border-rule-strong text-ink-soft hover:bg-paper-sunken'
+                  }`}
+                >
+                  {WEEKDAY_LABELS[dia]}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        {frequency !== 'weekly' && (
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Dia"
+              type="number"
+              min={1}
+              max={31}
+              figures
+              required
+              value={dayOfMonth}
+              onChange={(e) => setDayOfMonth(e.target.value)}
+              hint={frequency === 'yearly' ? undefined : 'Meses curtos: último dia.'}
+            />
+            {frequency === 'yearly' && (
+              <Select
+                label="Mês"
+                value={monthOfYear}
+                onChange={(e) => setMonthOfYear(e.target.value)}
+              >
+                {MESES.map((nome, i) => (
+                  <option key={nome} value={i + 1}>
+                    {nome}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </div>
+        )}
 
         {saveError && (
           <p role="alert" className="text-sm text-saida">

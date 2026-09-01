@@ -16,6 +16,7 @@ import {
   eachDay,
   isWithin,
   formatMonthLong,
+  weekdayDatesInMonth,
 } from '../../src/shared/dates';
 
 describe('conversão sem deslocamento de fuso', () => {
@@ -120,5 +121,55 @@ describe('exibição em pt-BR', () => {
   it('escreve o mês por extenso', () => {
     expect(formatMonthLong('2026-08')).toContain('agosto');
     expect(formatMonthLong('2026-08')).toContain('2026');
+  });
+});
+
+describe('weekdayDatesInMonth', () => {
+  it('devolve as cinco quando o mês tem cinco', () => {
+    // Setembro de 2026 começa numa terça: 1, 8, 15, 22 e 29.
+    expect(weekdayDatesInMonth('2026-09', 2)).toEqual([
+      '2026-09-01',
+      '2026-09-08',
+      '2026-09-15',
+      '2026-09-22',
+      '2026-09-29',
+    ]);
+  });
+
+  it('devolve quatro quando o mês tem quatro', () => {
+    expect(weekdayDatesInMonth('2027-02', 2)).toHaveLength(4);
+  });
+
+  it('inclui o dia 1 quando o mês começa naquele dia da semana', () => {
+    expect(weekdayDatesInMonth('2026-09', 2)[0]).toBe('2026-09-01');
+  });
+
+  it('inclui o último dia quando o mês termina naquele dia da semana', () => {
+    // 31 de agosto de 2026 é uma segunda.
+    const segundas = weekdayDatesInMonth('2026-08', 1);
+    expect(segundas[segundas.length - 1]).toBe('2026-08-31');
+  });
+
+  it('atravessa a virada do ano sem se perder', () => {
+    expect(weekdayDatesInMonth('2026-12', 5)).toEqual([
+      '2026-12-04',
+      '2026-12-11',
+      '2026-12-18',
+      '2026-12-25',
+    ]);
+    expect(weekdayDatesInMonth('2027-01', 5)[0]).toBe('2027-01-01');
+  });
+
+  it('fevereiro bissexto de 29 dias com o dia certo', () => {
+    // 2028 é bissexto; 29/02/2028 é uma terça.
+    expect(weekdayDatesInMonth('2028-02', 2)).toContain('2028-02-29');
+  });
+
+  it('todo dia do mês pertence a exatamente um dia da semana', () => {
+    const total = ([1, 2, 3, 4, 5, 6, 7] as const).reduce(
+      (soma, dia) => soma + weekdayDatesInMonth('2026-09', dia).length,
+      0,
+    );
+    expect(total).toBe(30);
   });
 });

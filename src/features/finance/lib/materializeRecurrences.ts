@@ -44,14 +44,20 @@ export async function materializeMonth(
   return results.filter((r) => r.status === 'fulfilled').length;
 }
 
-/** Prepara o mês informado e os seguintes dentro do horizonte. */
+/**
+ * Prepara os meses que as recorrências realmente precisam.
+ *
+ * `horizonFrom` devolve só os meses em que alguma recorrência cai — a anual
+ * alcança um ano à frente, mas contribui com um único mês. Quem não tem
+ * recorrência anual consulta exatamente os mesmos meses de antes.
+ */
 export async function materializeHorizon(
   uid: string,
   recurrences: Recurrence[],
   fromMonth: ISOMonth,
 ): Promise<number> {
   let created = 0;
-  for (const month of horizonFrom(fromMonth)) {
+  for (const month of horizonFrom(recurrences, fromMonth)) {
     created += await materializeMonth(uid, recurrences, month);
   }
   return created;

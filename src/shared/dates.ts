@@ -87,6 +87,19 @@ export function endOfMonth(month: ISOMonth): ISODate {
   return `${month}-${pad(daysInMonth(month))}`;
 }
 
+/**
+ * Todas as datas de um dia da semana dentro de um mês.
+ *
+ * Um mês tem quatro ou cinco ocorrências do mesmo dia da semana, e as cinco
+ * contam — é o caso que faz uma recorrência semanal parecer que "pulou" um
+ * mês quando o cálculo assume quatro.
+ */
+export function weekdayDatesInMonth(month: ISOMonth, weekday: Weekday): ISODate[] {
+  return eachDay(startOfMonth(month), endOfMonth(month)).filter(
+    (day) => weekdayOf(day) === weekday,
+  );
+}
+
 /** Todos os dias de um intervalo, inclusive nas duas pontas. */
 export function eachDay(from: ISODate, to: ISODate): ISODate[] {
   const days: ISODate[] = [];

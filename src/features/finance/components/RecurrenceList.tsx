@@ -5,7 +5,13 @@ import { Button } from '../../../design/components/Button';
 import { Modal } from '../../../design/components/Modal';
 import { ConfirmDialog } from '../../../design/components/ConfirmDialog';
 import { formatCents } from '../../../shared/money';
-import { addMonths, currentMonth } from '../../../shared/dates';
+import { addMonths, currentMonth, formatDayShort } from '../../../shared/dates';
+import {
+  describeFrequency,
+  nextOccurrence,
+  occurrenceBadge,
+  resolveFrequency,
+} from '../lib/recurrenceRules';
 import type { Category, Recurrence } from '../types';
 
 interface RecurrenceListProps {
@@ -47,6 +53,10 @@ export function RecurrenceList({
     }
   };
 
+  // Só a anual ganha a linha da próxima data: nas outras ela é óbvia e viraria ruído.
+  const proximaDe = (r: Recurrence) =>
+    resolveFrequency(r) === 'yearly' ? nextOccurrence(r, currentMonth()) : null;
+
   const active = recurrences.filter((r) => r.endMonth === null);
   const ended = recurrences.filter((r) => r.endMonth !== null);
 
@@ -70,7 +80,7 @@ export function RecurrenceList({
             {active.map((recurrence) => (
               <li key={recurrence.id} className="flex items-center gap-3 py-3 ledger-rule">
                 <span className="figures w-10 shrink-0 text-center text-sm text-ink-soft">
-                  {String(recurrence.dayOfMonth).padStart(2, '0')}
+                  {occurrenceBadge(recurrence)}
                 </span>
 
                 <button
@@ -80,8 +90,16 @@ export function RecurrenceList({
                 >
                   <span className="block truncate text-sm text-ink">{recurrence.description}</span>
                   <span className="text-xs text-ink-faint">
-                    {categoryById.get(recurrence.categoryId)?.name ?? 'Sem categoria'} · todo mês
+                    {categoryById.get(recurrence.categoryId)?.name ?? 'Sem categoria'} ·{' '}
+                    {describeFrequency(recurrence)}
                   </span>
+                  {/* A próxima data importa mais na anual: é o que responde
+                      "quando é que isso cai?" sem abrir o calendário. */}
+                  {proximaDe(recurrence) && (
+                    <span className="text-micro text-ink-faint">
+                      próxima em {formatDayShort(proximaDe(recurrence)!)}
+                    </span>
+                  )}
                 </button>
 
                 <span
@@ -113,7 +131,7 @@ export function RecurrenceList({
                       className="flex items-center gap-3 py-2 text-sm text-ink-faint"
                     >
                       <span className="figures w-10 shrink-0 text-center">
-                        {String(recurrence.dayOfMonth).padStart(2, '0')}
+                        {occurrenceBadge(recurrence)}
                       </span>
                       <span className="min-w-0 flex-1 truncate line-through">
                         {recurrence.description}

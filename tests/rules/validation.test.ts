@@ -107,6 +107,67 @@ describe('validação de shape nas regras', () => {
       await assertSucceeds(setDoc(recRef(), validRecurrence({ endMonth: '2026-12' })));
     });
 
+    /**
+     * Os dois formatos, lado a lado. O primeiro é o que mais importa: as
+     * recorrências gravadas antes desta feature não têm `frequency`, e uma
+     * regra que as recusasse quebraria até o encerramento delas.
+     */
+    it('aceita o formato ANTIGO, sem frequency — nada de migração', async () => {
+      await assertSucceeds(setDoc(recRef(), validRecurrence()));
+    });
+
+    it('aceita mensal explícita', async () => {
+      await assertSucceeds(setDoc(recRef(), validRecurrence({ frequency: 'monthly' })));
+    });
+
+    it('aceita semanal sem dayOfMonth, desde que tenha weekday', async () => {
+      await assertSucceeds(
+        setDoc(recRef(), validRecurrence({ frequency: 'weekly', weekday: 2, dayOfMonth: null })),
+      );
+    });
+
+    it('rejeita semanal sem weekday', async () => {
+      await assertFails(
+        setDoc(recRef(), validRecurrence({ frequency: 'weekly', dayOfMonth: null })),
+      );
+    });
+
+    it('rejeita weekday fora de 1–7', async () => {
+      await assertFails(setDoc(recRef(), validRecurrence({ frequency: 'weekly', weekday: 0 })));
+      await assertFails(setDoc(recRef(), validRecurrence({ frequency: 'weekly', weekday: 8 })));
+    });
+
+    it('aceita anual com dia e mês', async () => {
+      await assertSucceeds(
+        setDoc(recRef(), validRecurrence({ frequency: 'yearly', monthOfYear: 1 })),
+      );
+    });
+
+    it('rejeita anual sem monthOfYear', async () => {
+      await assertFails(setDoc(recRef(), validRecurrence({ frequency: 'yearly' })));
+    });
+
+    it('rejeita mês do ano fora de 1–12', async () => {
+      await assertFails(
+        setDoc(recRef(), validRecurrence({ frequency: 'yearly', monthOfYear: 13 })),
+      );
+    });
+
+    it('rejeita frequência desconhecida', async () => {
+      await assertFails(setDoc(recRef(), validRecurrence({ frequency: 'quinzenal' })));
+    });
+
+    it('aceita a lista de descartes, presente ou ausente', async () => {
+      await assertSucceeds(
+        setDoc(recRef(), validRecurrence({ skips: ['2026-09-01', '2026-10'] })),
+      );
+      await assertSucceeds(setDoc(recRef(), validRecurrence({ skips: [] })));
+    });
+
+    it('rejeita descartes que não são lista', async () => {
+      await assertFails(setDoc(recRef(), validRecurrence({ skips: 'nenhum' })));
+    });
+
     it('rejeita endMonth fora do formato YYYY-MM', async () => {
       await assertFails(setDoc(recRef(), validRecurrence({ endMonth: 'dezembro' })));
     });

@@ -151,9 +151,37 @@ ser dia 5 em qualquer fuso; `Timestamp` traria bugs de virada de dia.
 cache do saldo acumulado e pode ser refeito a qualquer momento com
 `rebuildMonthStats` — por isso ele nunca é a única fonte de verdade.
 
-**Recorrências financeiras viram lançamentos previstos com id determinístico**
-(`rec_{recorrência}_{mês}`). Dois aparelhos abrindo o mesmo mês convergem para
-um documento só, em vez de duplicarem o aluguel. Não há Cloud Functions.
+**Recorrências financeiras viram lançamentos previstos com id determinístico.**
+Dois aparelhos abrindo o mesmo mês convergem para um documento só, em vez de
+duplicarem o aluguel. Não há Cloud Functions.
+
+A chave do id identifica o que torna a ocorrência única naquela frequência:
+
+| Frequência | Cadastro | Chave do lançamento | Alcance |
+| --- | --- | --- | --- |
+| Semanal | dia da semana | `rec_{id}_{AAAA-MM-DD}` | 3 meses |
+| Mensal | dia do mês | `rec_{id}_{AAAA-MM}` | 3 meses |
+| Anual | dia e mês | `rec_{id}_{AAAA-MM}` | 12 meses |
+
+A semanal precisa da data porque tem quatro ou cinco ocorrências no mesmo mês;
+a chave por mês colapsaria todas num documento só. A anual alcança um ano
+porque saber cedo de uma despesa grande é o valor inteiro dela — mas prepara
+**apenas o mês em que cai**, não os doze.
+
+**Ausência de `frequency` significa mensal.** Toda recorrência gravada antes
+dessa distinção existir continua valendo, com as mesmas datas e as mesmas
+chaves. Um único ponto do código lê o campo (`resolveFrequency`, em
+`lib/recurrenceRules.ts`); espalhar essa leitura garantiria que um dos lugares
+esqueceria o padrão e duplicaria o que já está gravado.
+
+**A consulta de recorrências não usa `orderBy`.** O Firestore omite do
+resultado todo documento que não tem o campo ordenado — ordenar por
+`dayOfMonth` tornava a recorrência semanal invisível, cadastrada com sucesso e
+nunca exibida. A ordenação é feita em memória.
+
+**Excluir um previsto registra o descarte na recorrência** (campo `skips`).
+Sem isso, a geração não encontraria o documento apagado e o recriaria na
+próxima vez que o mês fosse preparado.
 
 **Recorrências de rotina não são gravadas dia a dia.** A série é expandida em
 memória e só vira documento quando você mexe naquele dia (concluir, editar,
