@@ -121,26 +121,35 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
+  /*
+    Preto de verdade no fundo. As superfícies são neutras — nada de cinza
+    esverdeado —, mas a tinta continua levemente quente: é ela que carrega a
+    identidade da caderneta, e um branco puro sobre preto puro vibra e cansa
+    a vista em leitura longa.
+
+    O cartão é #121212 e não preto: sem alguma elevação, um diálogo sobre a
+    página some, e a sombra sozinha não dá conta no escuro.
+  */
   --color-ink: #edeae3;
-  --color-ink-soft: #a8b3ad;
-  --color-ink-faint: #8a968f;
+  --color-ink-soft: #ababa6;
+  --color-ink-faint: #8c8c88;
 
-  --color-paper: #121a18;
-  --color-paper-raised: #16211d;
-  --color-paper-sunken: #0e1614;
+  --color-paper: #000000;
+  --color-paper-raised: #121212;
+  --color-paper-sunken: #0a0a0a;
 
-  --color-rule: #293632;
-  --color-rule-strong: #3c4b46;
+  --color-rule: #262626;
+  --color-rule-strong: #3d3d3d;
 
   --color-entrada: #4fa98f;
-  --color-entrada-wash: #16302a;
+  --color-entrada-wash: #0d2620;
   --color-saida: #d98a97;
-  --color-saida-wash: #352025;
+  --color-saida-wash: #2b1a1e;
   --color-acao: #8faee0;
   --color-acao-hover: #a7c1ea;
-  --color-acao-wash: #1b2637;
+  --color-acao-wash: #131c29;
   --color-atencao: #d9a85a;
-  --color-atencao-wash: #332814;
+  --color-atencao-wash: #2a2010;
 
   /* Mesmos matizes, repassados para a superfície escura e revalidados. */
   --color-cat-1: #5b8fd9;
@@ -151,11 +160,15 @@
   --color-cat-6: #6c9636;
   --color-cat-7: #8e7be0;
   --color-cat-8: #d65b5d;
-  --color-cat-other: #8a968f;
+  --color-cat-other: #8c8c88;
 
-  /* Sombra precisa de mais peso no escuro para continuar existindo. */
-  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 1px rgb(0 0 0 / 0.3);
-  --shadow-float: 0 8px 24px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
+  /*
+    Sobre preto, sombra preta não existe. A elevação passa a vir do próprio
+    tom do cartão (#121212 sobre #000000) e a sombra vira só um assentamento
+    discreto.
+  */
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 8px 24px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.5);
 }
 
 @layer base {

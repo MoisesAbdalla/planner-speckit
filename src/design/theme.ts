@@ -79,7 +79,7 @@ export const PREFERENCE_LABEL: Record<ThemePreference, string> = {
 /** Cor da barra do navegador em cada tema — acompanha `--color-paper`. */
 export const THEME_COLOR: Record<EffectiveTheme, string> = {
   light: '#fbf9f5',
-  dark: '#121a18',
+  dark: '#000000',
 };
 
 /** Aplica o tema no documento. Único lugar que escreve `data-theme`. */
