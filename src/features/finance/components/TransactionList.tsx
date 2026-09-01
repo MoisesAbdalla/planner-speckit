@@ -51,13 +51,17 @@ export function TransactionList({
             return (
               <li
                 key={tx.id}
-                className={`group flex items-center gap-3 px-1 py-3 ${
+                // A linha nova desce para o lugar dela; e ao confirmar, o fio
+                // tracejado vira contínuo e a figura ganha peso. É a gramática
+                // da caderneta acontecendo — o único movimento do app que
+                // carrega significado em vez de enfeitar.
+                className={`animate-ledger-in group flex items-center gap-3 px-1 py-3 transition-[border-color] duration-[--ease-settle] ease-[--ease-in-out] ${
                   planned ? 'ledger-rule-planned' : 'ledger-rule'
                 }`}
               >
                 <span
                   aria-hidden="true"
-                  className="h-6 w-1 shrink-0 rounded-pill"
+                  className="h-6 w-1 shrink-0 rounded-pill transition-opacity duration-[--ease-settle]"
                   style={{
                     backgroundColor: category ? categoryColor(category.sortOrder) : OTHER_COLOR,
                     opacity: planned ? 0.4 : 1,
@@ -83,19 +87,20 @@ export function TransactionList({
                   <button
                     type="button"
                     onClick={() => onConfirm(tx)}
-                    className="shrink-0 rounded-sm border border-acao/30 px-2 py-1 text-xs font-medium text-acao transition-colors hover:bg-acao-wash"
+                    className="shrink-0 rounded-sm border border-acao/30 px-2 py-1 text-xs font-medium text-acao transition-[background-color,transform] duration-[--ease-snap] ease-[--ease-out] hover:bg-acao-wash active:scale-95"
                   >
                     Confirmar
                   </button>
                 )}
 
                 <span
-                  className={`figures w-24 shrink-0 text-right text-sm tabular-nums ${
+                  key={tx.status}
+                  className={`figures w-24 shrink-0 text-right text-sm tabular-nums transition-colors duration-[--ease-settle] ${
                     planned
                       ? 'font-normal text-ink-faint'
-                      : tx.type === 'income'
-                        ? 'font-medium text-entrada'
-                        : 'font-medium text-ink'
+                      : `animate-settle font-medium ${
+                          tx.type === 'income' ? 'text-entrada' : 'text-ink'
+                        }`
                   }`}
                 >
                   {tx.type === 'income' ? '+' : '−'}
@@ -106,7 +111,7 @@ export function TransactionList({
                   type="button"
                   onClick={() => onDelete(tx)}
                   aria-label={`Excluir ${tx.description}`}
-                  className="shrink-0 rounded-sm px-1.5 py-1 text-ink-faint opacity-0 transition-opacity hover:bg-saida-wash hover:text-saida focus-visible:opacity-100 group-hover:opacity-100"
+                  className="shrink-0 rounded-sm px-1.5 py-1 text-ink-faint opacity-0 transition-[opacity,background-color,transform] duration-[--ease-snap] hover:bg-saida-wash hover:text-saida focus-visible:opacity-100 active:scale-90 group-hover:opacity-100"
                 >
                   ✕
                 </button>

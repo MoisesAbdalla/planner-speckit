@@ -55,7 +55,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div
-        className="absolute inset-0 bg-ink/30"
+        className="animate-overlay-in absolute inset-0 bg-ink/30"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -65,7 +65,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="relative w-full max-w-lg rounded-t-lg bg-paper-raised shadow-float outline-none sm:rounded-lg"
+        className="animate-sheet-in relative w-full max-w-lg rounded-t-lg bg-paper-raised shadow-float outline-none sm:rounded-lg"
       >
         <header className="flex items-center justify-between border-b border-rule px-4 py-3">
           <h2 className="text-lg">{title}</h2>
@@ -73,7 +73,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-sm px-2 py-1 text-ink-soft hover:bg-paper-sunken hover:text-ink"
+            className="rounded-sm px-2 py-1 text-ink-soft transition-colors duration-[--ease-snap] hover:bg-paper-sunken hover:text-ink"
           >
             ✕
           </button>

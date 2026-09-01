@@ -79,6 +79,25 @@
 
   --shadow-raised: 0 1px 2px rgb(22 33 29 / 0.05), 0 1px 1px rgb(22 33 29 / 0.04);
   --shadow-float: 0 8px 24px rgb(22 33 29 / 0.1), 0 2px 6px rgb(22 33 29 / 0.06);
+
+  /* — Movimento ———————————————————————————————— */
+  /*
+    Três durações, não mais. Movimento é linguagem: se cada elemento tem o
+    seu tempo, nada tem ritmo.
+
+    `snap` é para resposta ao toque — precisa ser quase imperceptível, senão
+    o botão parece lento. `base` é para o que entra e sai. `settle` fica
+    reservado ao momento em que um valor assenta na coluna do razão.
+
+    Tudo aqui é anulado por prefers-reduced-motion, mais abaixo.
+  */
+  --ease-snap: 90ms;
+  --ease-base: 180ms;
+  --ease-settle: 320ms;
+
+  /* Saída desacelerada: o elemento chega e para, não freia bruscamente. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /*
@@ -232,6 +251,81 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/*
+  Entradas. A lista de lançamentos é uma coluna do razão: uma linha nova
+  desce para o lugar dela, em vez de aparecer do nada.
+*/
+@keyframes ledger-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes draw-check {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* O momento assinatura: o valor confirmado assenta na coluna. */
+@keyframes settle-in {
+  0% {
+    opacity: 0.5;
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility animate-ledger-in {
+  animation: ledger-in var(--ease-base) var(--ease-out) both;
+}
+
+@utility animate-sheet-in {
+  animation: sheet-in var(--ease-base) var(--ease-out) both;
+}
+
+@utility animate-overlay-in {
+  animation: overlay-in var(--ease-base) var(--ease-out) both;
+}
+
+@utility animate-settle {
+  animation: settle-in var(--ease-settle) var(--ease-out) both;
 }
 
 @utility ledger-rule {

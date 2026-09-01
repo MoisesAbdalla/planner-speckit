@@ -42,7 +42,7 @@ export function TaskItem({
         aria-checked={done}
         onClick={() => onToggle(occurrence)}
         aria-label={done ? `Desmarcar ${title}` : `Concluir ${title}`}
-        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-colors ${
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-[background-color,border-color,transform] duration-[--ease-snap] ease-[--ease-out] active:scale-90 ${
           done
             ? 'border-entrada bg-entrada text-paper'
             : isOverdue
@@ -52,6 +52,8 @@ export function TaskItem({
       >
         {done && (
           <svg viewBox="0 0 12 12" className="h-3 w-3" aria-hidden="true">
+            {/* O tique se desenha em vez de surgir pronto: concluir uma
+                tarefa é o gesto mais repetido do planner, e vale sentir. */}
             <path
               d="M2 6.5L4.5 9L10 3"
               fill="none"
@@ -59,6 +61,8 @@ export function TaskItem({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              pathLength={1}
+              className="[stroke-dasharray:1] [stroke-dashoffset:0] motion-safe:animate-[draw-check_var(--ease-base)_var(--ease-out)]"
             />
           </svg>
         )}
