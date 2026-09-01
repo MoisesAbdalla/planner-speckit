@@ -90,7 +90,7 @@ export function TransactionList({
                 )}
 
                 <span
-                  className={`figures shrink-0 text-sm tabular-nums ${
+                  className={`figures w-24 shrink-0 text-right text-sm tabular-nums ${
                     planned
                       ? 'font-normal text-ink-faint'
                       : tx.type === 'income'

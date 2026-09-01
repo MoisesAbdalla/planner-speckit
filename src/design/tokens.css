@@ -49,25 +49,6 @@
   --color-atencao: #8a5f1c;
   --color-atencao-wash: #f6efe2;
 
-  /*
-    Paleta de categorias — validada pelas seis checagens de visualização de
-    dados (`npm run validate:palette`). Ordem fixa, nunca ciclada: um nono
-    matiz seria indistinguível dos existentes sob daltonismo, então a cauda
-    dobra em "Outros".
-
-    A paleta anterior foi escolhida a olho e tinha ΔE 1,9 entre duas
-    categorias — praticamente a mesma cor para quem tem deuteranopia.
-  */
-  --color-cat-1: #2c5fa8;
-  --color-cat-2: #c4562a;
-  --color-cat-3: #1b8a6b;
-  --color-cat-4: #b07c0a;
-  --color-cat-5: #a8477e;
-  --color-cat-6: #4f7a1f;
-  --color-cat-7: #5b46b5;
-  --color-cat-8: #c93f42;
-  --color-cat-other: var(--color-ink-faint);
-
   /* — Tipografia ——————————————————————————————— */
   --font-display: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
   --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -98,6 +79,32 @@
 
   --shadow-raised: 0 1px 2px rgb(22 33 29 / 0.05), 0 1px 1px rgb(22 33 29 / 0.04);
   --shadow-float: 0 8px 24px rgb(22 33 29 / 0.1), 0 2px 6px rgb(22 33 29 / 0.06);
+}
+
+/*
+  Paleta de categorias — validada pelas seis checagens de visualização de
+  dados (`npm run validate:palette`). Ordem fixa, nunca ciclada: um nono
+  matiz seria indistinguível dos existentes sob daltonismo, então a cauda
+  dobra em "Outros".
+
+  A paleta anterior foi escolhida a olho e tinha ΔE 1,9 entre duas
+  categorias — praticamente a mesma cor para quem tem deuteranopia.
+
+  Fica FORA do bloco @theme de propósito: o Tailwind remove de lá as
+  variáveis que nenhuma classe utilitária referencia, e estas são consumidas
+  via var() em estilo inline. Dentro do @theme elas sumiam do CSS publicado e
+  as barras ficavam invisíveis no tema claro.
+*/
+:root {
+  --color-cat-1: #2c5fa8;
+  --color-cat-2: #c4562a;
+  --color-cat-3: #1b8a6b;
+  --color-cat-4: #b07c0a;
+  --color-cat-5: #a8477e;
+  --color-cat-6: #4f7a1f;
+  --color-cat-7: #5b46b5;
+  --color-cat-8: #c93f42;
+  --color-cat-other: #646f6a;
 }
 
 /*
@@ -144,6 +151,7 @@
   --color-cat-6: #6c9636;
   --color-cat-7: #8e7be0;
   --color-cat-8: #d65b5d;
+  --color-cat-other: #8a968f;
 
   /* Sombra precisa de mais peso no escuro para continuar existindo. */
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 1px rgb(0 0 0 / 0.3);

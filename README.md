@@ -97,6 +97,28 @@ src/
 Cada feature separa `lib/` (funções puras, testadas), `hooks/` (leitura em
 tempo real do Firestore) e `components/` (interface).
 
+## Temas
+
+O app tem tema claro e escuro. Por padrão segue o tema do aparelho; o botão no
+trilho lateral (ou no cabeçalho, no celular) percorre Sistema → Claro →
+Escuro, e a escolha fica lembrada naquele aparelho.
+
+Ao mexer em qualquer cor de categoria, **revalide antes de publicar**:
+
+```bash
+npm run validate:palette
+```
+
+Precisa sair `ALL CHECKS PASS` nos dois modos. A paleta original deste projeto
+foi escolhida a olho e tinha ΔE 1,9 entre duas categorias — praticamente a
+mesma cor para quem tem deuteranopia. Não dá para avaliar isso no olho.
+
+Duas armadilhas registradas em
+[contracts/design-tokens.md](specs/002-dark-mode-visual-refresh/contracts/design-tokens.md):
+as cores de categoria ficam fora do bloco `@theme` (senão o Tailwind as
+descarta), e utilitários condicionais de tema (`dark:`) são proibidos nos
+componentes — a decisão de tema vive só na camada de tokens.
+
 ## Decisões que valem saber
 
 **Dinheiro é inteiro em centavos.** Nenhum valor passa por ponto flutuante:

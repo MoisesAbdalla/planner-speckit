@@ -82,6 +82,12 @@ Invariantes:
    em todas.
 3. Cor nunca é o único portador de identidade: toda fatia carrega rótulo
    direto ou entrada na lista textual (FR-013).
+4. **A paleta fica fora do bloco `@theme`.** O Tailwind remove de lá as
+   variáveis que nenhuma classe utilitária referencia, e estas são consumidas
+   via `var()` em estilo inline. Dentro do `@theme`, as oito cores claras
+   sumiam do CSS publicado e as barras ficavam invisíveis no tema claro —
+   sem erro de build, sem teste vermelho. Verificar o CSS gerado após mexer
+   na paleta, não só o resultado em desenvolvimento.
 
 ## Contrato dos gráficos
 

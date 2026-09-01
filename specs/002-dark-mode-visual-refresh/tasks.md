@@ -98,7 +98,7 @@ identificar a categoria dominante em até 3 segundos sem ler números.
 - [X] T026 [US2] Compor a comparação entre meses em src/features/finance/components/MonthTrend.tsx a partir dos `monthStats` já lidos, sem nenhuma leitura nova do Firestore, com equivalente textual dos valores de cada mês (FR-013)
 - [X] T027 [US2] Reorganizar src/features/finance/components/MonthSummary.tsx para liderar pela leitura visual, mantendo os valores em figuras tabulares e o saldo acumulado como número secundário
 - [X] T028 [US2] Implementar o estado vazio de cada visualização (mês sem movimentação, histórico insuficiente para comparar) em src/features/finance/components/, sem gráfico quebrado nem área em branco (FR-014)
-- [ ] T029 [US2] Conferir em ~375px os casos-limite das visualizações de src/features/finance/components/: categoria única com 100%, um gasto muito maior que os demais, e conteúdo largo rolando dentro da própria área
+- [X] T029 [US2] Conferir em ~375px os casos-limite das visualizações de src/features/finance/components/: categoria única com 100%, um gasto muito maior que os demais, e conteúdo largo rolando dentro da própria área
 
 **Checkpoint**: US1 e US2 funcionam de forma independente
 
@@ -112,12 +112,12 @@ nenhuma tarefa fique mais trabalhosa.
 **Independent Test**: comparar as telas entre si e os dois temas entre si; a
 linguagem visual é a mesma e o escuro não parece uma versão apagada do claro.
 
-- [ ] T030 [US3] Revisar hierarquia tipográfica e espaçamento nas telas principais (src/routes/, src/features/finance/components/, src/features/planner/components/), aprofundando a metáfora da caderneta em vez de substituí-la
-- [ ] T031 [US3] Uniformizar a linguagem dos fios e das figuras tabulares entre src/features/finance/components/TransactionList.tsx, MonthSummary.tsx e src/design/components/charts/, para que a coluna de valores alinhe do mesmo jeito em toda parte
-- [ ] T032 [P] [US3] Garantir que todo movimento respeite `prefers-reduced-motion` em src/design/tokens.css e nos componentes que animam (FR-020)
-- [ ] T033 [US3] Verificar o foco de teclado visível em todos os controles nos dois temas, incluindo o novo controle de tema
+- [X] T030 [US3] Revisar hierarquia tipográfica e espaçamento nas telas principais (src/routes/, src/features/finance/components/, src/features/planner/components/), aprofundando a metáfora da caderneta em vez de substituí-la
+- [X] T031 [US3] Uniformizar a linguagem dos fios e das figuras tabulares entre src/features/finance/components/TransactionList.tsx, MonthSummary.tsx e src/design/components/charts/, para que a coluna de valores alinhe do mesmo jeito em toda parte
+- [X] T032 [P] [US3] Garantir que todo movimento respeite `prefers-reduced-motion` em src/design/tokens.css e nos componentes que animam (FR-020)
+- [X] T033 [US3] Verificar o foco de teclado visível em todos os controles nos dois temas, incluindo o novo controle de tema
 - [ ] T034 [US3] Simular deuteranopia e protanopia no DevTools sobre a distribuição por categoria e confirmar que categorias vizinhas continuam distinguíveis
-- [ ] T035 [US3] Conferir que nenhuma tarefa existente ganhou passos: registrar um gasto continua em no máximo 3 interações a partir da tela inicial (SC-006)
+- [X] T035 [US3] Conferir que nenhuma tarefa existente ganhou passos: registrar um gasto continua em no máximo 3 interações a partir da tela inicial (SC-006)
 
 **Checkpoint**: todas as user stories funcionais
 
@@ -125,9 +125,9 @@ linguagem visual é a mesma e o escuro não parece uma versão apagada do claro.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T036 [P] Rodar `npm run validate:palette` e confirmar `ALL CHECKS PASS` nos dois modos
-- [ ] T037 [P] Atualizar README.md com a seção de temas e a regra de revalidar a paleta ao mexer em cor de categoria
-- [ ] T038 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint e o build
+- [X] T036 [P] Rodar `npm run validate:palette` e confirmar `ALL CHECKS PASS` nos dois modos
+- [X] T037 [P] Atualizar README.md com a seção de temas e a regra de revalidar a paleta ao mexer em cor de categoria
+- [X] T038 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint e o build
 - [ ] T038a Percorrer todas as telas nas quatro combinações — tema claro e escuro × ~375px e ~1280px — conferindo legibilidade e ausência de corte, em src/routes/ e src/features/ (SC-007)
 - [ ] T039 Executar os três blocos de validação manual de quickstart.md nos dois temas e nas duas larguras
 - [ ] T040 Publicar e conferir no celular real com o tema escuro do sistema — o caso de uso que originou a feature
