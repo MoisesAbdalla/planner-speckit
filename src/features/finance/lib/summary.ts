@@ -14,7 +14,7 @@ export interface CategorySlice {
   /** Referencia CSS do slot validado — troca de tema sozinha. */
   color: string;
   cents: number;
-  /** Fração do total de saídas, de 0 a 1. */
+  /** Fração do total de saídas efetivadas, de 0 a 1. */
   share: number;
 }
 
@@ -32,6 +32,15 @@ export interface MonthSummary {
   plannedExpenseCents: number;
   /** Distribuição das saídas efetivadas, da maior para a menor. */
   byCategory: CategorySlice[];
+  /**
+   * Previsto por categoria, à parte da distribuição.
+   *
+   * Fica separado de propósito: `byCategory` responde "para onde o dinheiro
+   * foi", uma pergunta sobre o passado, e uma categoria que só tem previsto
+   * não pertence a essa lista. Mas a meta precisa do previsto para usar a
+   * mesma base do teto geral, então ele vive aqui.
+   */
+  plannedByCategory: Record<string, number>;
   confirmedCount: number;
   plannedCount: number;
 }
@@ -44,6 +53,7 @@ const EMPTY: MonthSummary = {
   plannedIncomeCents: 0,
   plannedExpenseCents: 0,
   byCategory: [],
+  plannedByCategory: {},
   confirmedCount: 0,
   plannedCount: 0,
 };
@@ -52,10 +62,11 @@ export function summarizeMonth(
   transactions: Transaction[],
   categories: Category[] = [],
 ): MonthSummary {
-  if (transactions.length === 0) return { ...EMPTY, byCategory: [] };
+  if (transactions.length === 0) return { ...EMPTY, byCategory: [], plannedByCategory: {} };
 
   const categoryById = new Map(categories.map((c) => [c.id, c]));
   const perCategory = new Map<string, number>();
+  const plannedPerCategory = new Map<string, number>();
 
   let incomeCents = 0;
   let expenseCents = 0;
@@ -75,8 +86,15 @@ export function summarizeMonth(
       }
     } else {
       plannedCount += 1;
-      if (tx.type === 'income') plannedIncomeCents += tx.amountCents;
-      else plannedExpenseCents += tx.amountCents;
+      if (tx.type === 'income') {
+        plannedIncomeCents += tx.amountCents;
+      } else {
+        plannedExpenseCents += tx.amountCents;
+        plannedPerCategory.set(
+          tx.categoryId,
+          (plannedPerCategory.get(tx.categoryId) ?? 0) + tx.amountCents,
+        );
+      }
     }
   }
 
@@ -90,6 +108,7 @@ export function summarizeMonth(
         name: category?.name ?? 'Sem categoria',
         color: category ? categoryColor(category.sortOrder) : OTHER_COLOR,
         cents,
+        plannedCents: plannedPerCategory.get(categoryId) ?? 0,
         share: expenseCents === 0 ? 0 : cents / expenseCents,
       };
     })
@@ -104,6 +123,7 @@ export function summarizeMonth(
     plannedIncomeCents,
     plannedExpenseCents,
     byCategory,
+    plannedByCategory: Object.fromEntries(plannedPerCategory),
     confirmedCount,
     plannedCount,
   };

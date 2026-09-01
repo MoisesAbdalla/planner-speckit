@@ -162,3 +162,59 @@ describe('accumulatedBalance', () => {
     expect(accumulatedBalance({}, '2026-08')).toBe(0);
   });
 });
+
+describe('previsto por categoria', () => {
+  it('separa o previsto do efetivado na mesma categoria', () => {
+    const s = summarizeMonth(
+      [
+        tx({ type: 'expense', amountCents: 10000, categoryId: 'cat-1' }),
+        tx({ type: 'expense', amountCents: 25000, categoryId: 'cat-1', status: 'planned' }),
+      ],
+      categories,
+    );
+
+    expect(s.byCategory.find((c) => c.categoryId === 'cat-1')!.cents).toBe(10000);
+    expect(s.plannedByCategory['cat-1']).toBe(25000);
+  });
+
+  it('categoria só com previsto ainda aparece — senão a meta dela ficaria invisível', () => {
+    const s = summarizeMonth(
+      [tx({ type: 'expense', amountCents: 120000, categoryId: 'cat-2', status: 'planned' })],
+      categories,
+    );
+
+    // Nao entra na distribuicao — ela e sobre o que ja saiu.
+    expect(s.byCategory.find((c) => c.categoryId === 'cat-2')).toBeUndefined();
+    // Mas o previsto esta disponivel para a camada de metas.
+    expect(s.plannedByCategory['cat-2']).toBe(120000);
+  });
+
+  it('a soma do previsto por categoria fecha com o total previsto do mês', () => {
+    const s = summarizeMonth(
+      [
+        tx({ type: 'expense', amountCents: 25000, categoryId: 'cat-1', status: 'planned' }),
+        tx({ type: 'expense', amountCents: 120000, categoryId: 'cat-2', status: 'planned' }),
+        tx({ type: 'income', amountCents: 500000, categoryId: 'cat-3', status: 'planned' }),
+      ],
+      categories,
+    );
+
+    const somaCategorias = Object.values(s.plannedByCategory).reduce((a, b) => a + b, 0);
+    expect(somaCategorias).toBe(s.plannedExpenseCents);
+    expect(somaCategorias).toBe(145000);
+  });
+
+  it('previsto não contamina a fração da distribuição, que é do efetivado', () => {
+    const s = summarizeMonth(
+      [
+        tx({ type: 'expense', amountCents: 10000, categoryId: 'cat-1' }),
+        tx({ type: 'expense', amountCents: 90000, categoryId: 'cat-2', status: 'planned' }),
+      ],
+      categories,
+    );
+
+    expect(s.byCategory).toHaveLength(1);
+    expect(s.byCategory[0]!.share).toBe(1);
+    expect(s.plannedByCategory['cat-2']).toBe(90000);
+  });
+});

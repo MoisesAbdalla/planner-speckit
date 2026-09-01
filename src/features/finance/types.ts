@@ -61,6 +61,46 @@ export interface Recurrence {
   updatedAt?: Timestamp | null;
 }
 
+/** Um valor de meta que passa a valer a partir de um mês, inclusive. */
+export interface GoalVersion {
+  from: ISOMonth;
+  amountCents: number;
+}
+
+/**
+ * Meta de gasto — uma linha do tempo, não um número.
+ *
+ * `versions` guarda o histórico do valor padrão e `overrides` as exceções de
+ * meses específicos. É o que permite mudar a meta hoje sem reescrever como um
+ * mês passado foi avaliado: cada mês encontra o valor que valia à época.
+ */
+export interface BudgetGoal {
+  /** `"overall"` para o teto do mês, ou o id da categoria. */
+  id: string;
+  target: 'overall' | 'category';
+  categoryId: string | null;
+  versions: GoalVersion[];
+  overrides: Record<ISOMonth, number>;
+  createdAt?: Timestamp | null;
+  updatedAt?: Timestamp | null;
+}
+
+export type GoalState = 'within' | 'near' | 'over';
+
+/** Consumo de uma meta num mês — sempre derivado, nunca armazenado. */
+export interface GoalConsumption {
+  goalCents: number;
+  usedCents: number;
+  plannedCents: number;
+  /** `goal − used − planned`; negativo quando estourou. */
+  remainingCents: number;
+  /** `used / goal`; passar de 1 é o próprio sinal de excesso. */
+  ratio: number;
+  /** Fração da barra onde a entrada do mês cai; só no teto geral. */
+  incomeMark: number | null;
+  state: GoalState;
+}
+
 export interface MonthStats {
   incomeCents: number;
   expenseCents: number;

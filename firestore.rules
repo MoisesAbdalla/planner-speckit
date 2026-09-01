@@ -88,6 +88,27 @@ service cloud.firestore {
           && overrideId == request.resource.data.taskId + '_' + request.resource.data.date;
       }
 
+      match /budgetGoals/{alvo} {
+        allow read, delete: if signedInAs(uid);
+        allow create, update: if signedInAs(uid)
+          && request.resource.data.target in ['overall', 'category']
+          // O id do documento e o alvo precisam concordar: sem isso, uma meta
+          // de categoria poderia se passar pelo teto geral.
+          && (request.resource.data.target != 'category'
+              || (request.resource.data.categoryId is string
+                  && request.resource.data.categoryId == alvo))
+          && (request.resource.data.target != 'overall' || alvo == 'overall')
+          && request.resource.data.versions is list
+          && request.resource.data.versions.size() >= 1
+          && request.resource.data.versions.size() <= 240
+          && request.resource.data.overrides is map
+          && request.resource.data.overrides.size() <= 240;
+        // O valor nao negativo de cada versao NAO e validado aqui: as regras
+        // do Firestore nao iteram listas. Essa garantia e do app, coberta por
+        // teste unitario. Achatar a estrutura para validar aqui custaria o
+        // historico por mes, que e a razao de existir desta feature.
+      }
+
       match /monthStats/{month} {
         allow read, delete: if signedInAs(uid);
         allow create, update: if signedInAs(uid)
