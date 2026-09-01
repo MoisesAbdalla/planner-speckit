@@ -130,7 +130,7 @@ linguagem visual é a mesma e o escuro não parece uma versão apagada do claro.
 - [X] T038 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint e o build
 - [ ] T038a Percorrer todas as telas nas quatro combinações — tema claro e escuro × ~375px e ~1280px — conferindo legibilidade e ausência de corte, em src/routes/ e src/features/ (SC-007)
 - [ ] T039 Executar os três blocos de validação manual de quickstart.md nos dois temas e nas duas larguras
-- [ ] T040 Publicar e conferir no celular real com o tema escuro do sistema — o caso de uso que originou a feature
+- [X] T040 Publicar e conferir no celular real com o tema escuro do sistema — o caso de uso que originou a feature
 
 ---
 
