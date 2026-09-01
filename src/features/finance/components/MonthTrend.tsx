@@ -42,7 +42,10 @@ export function MonthTrend({ stats, month }: MonthTrendProps) {
     .join('; ');
 
   return (
-    <div className="border-t border-rule px-4 py-4">
+    <section
+      className="rounded-md border px-4 py-4"
+      style={{ background: 'var(--surface-card)', borderColor: 'var(--surface-card-border)' }}
+    >
       <div className="flex items-baseline justify-between gap-2">
         <ColumnLabel>Comparado aos meses anteriores</ColumnLabel>
         {anteriores.length > 0 && (
@@ -69,6 +72,6 @@ export function MonthTrend({ stats, month }: MonthTrendProps) {
           formatValue={formatCents}
         />
       </div>
-    </div>
+    </section>
   );
 }

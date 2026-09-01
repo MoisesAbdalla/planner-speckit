@@ -73,7 +73,7 @@ export function Meter({
         ? 'bg-atencao-wash'
         : overspent
           ? 'bg-saida-wash'
-          : 'bg-paper-sunken';
+          : 'bg-[--surface-track]';
 
   return (
     <div>
@@ -82,20 +82,20 @@ export function Meter({
       <p className="sr-only">{resumo}</p>
 
       <div
-        className={`relative flex h-2.5 w-full overflow-hidden rounded-pill ${trilho}`}
+        className={`relative flex h-2 w-full overflow-hidden rounded-pill ${trilho}`}
         role="img"
         aria-label={resumo}
       >
         <span
-          className="h-full bg-saida transition-[width] duration-300"
+          className="meter-bar h-full rounded-pill transition-[width] duration-[--ease-settle] ease-[--ease-out]"
           style={{ width: `${usado * 100}%` }}
         />
         {previsto > 0 && (
           <>
             {/* Vão de 2px na cor da superfície: separa sem precisar de borda. */}
-            <span className="h-full w-0.5 shrink-0 bg-paper-raised" aria-hidden="true" />
+            <span className="h-full w-0.5 shrink-0" style={{ background: 'var(--surface-track)' }} aria-hidden="true" />
             <span
-              className="h-full bg-saida/35 transition-[width] duration-300"
+              className="h-full rounded-pill bg-saida/35 transition-[width] duration-[--ease-settle] ease-[--ease-out]"
               style={{ width: `${previsto * 100}%` }}
             />
           </>

@@ -6,7 +6,7 @@ import { MonthTrend } from './MonthTrend';
 import { goalConsumption, hasMonthOverride, resolveGoal } from '../lib/goals';
 import type { MonthSummary as Summary } from '../lib/summary';
 import type { BudgetGoal, MonthStats } from '../types';
-import type { ISOMonth } from '../../../shared/dates';
+import { formatMonthLong, type ISOMonth } from '../../../shared/dates';
 
 interface MonthSummaryProps {
   summary: Summary;
@@ -56,31 +56,52 @@ export function MonthSummary({
   const tetoAjustado = hasMonthOverride(overallGoal, month);
 
   return (
-    <section className="rounded-md border border-rule bg-paper-raised shadow-raised">
-      <div className="px-4 pt-4">
-        <ColumnLabel>Saldo do mês</ColumnLabel>
-        <p className={`figures mt-1 text-3xl font-medium ${positive ? 'text-ink' : 'text-saida'}`}>
-          {formatCents(balanceCents)}
-        </p>
+    <div className="flex flex-col gap-3.5">
+      {/* Cartão do saldo: gradiente e um brilho atrás do número. É a única
+          superfície do app com tratamento — o resto é plano, então ela lidera
+          sem precisar competir. */}
+      <section
+        className="relative overflow-hidden rounded-lg border p-5 pt-[22px]"
+        style={{
+          background: 'var(--surface-hero)',
+          borderColor: 'var(--surface-hero-border)',
+        }}
+      >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-28 h-56 w-56 rounded-pill"
+          style={{ background: 'var(--surface-hero-glow)' }}
+        />
 
-        <p className="mt-1 text-xs text-ink-soft">
-          {hasHistory && (
-            <>
-              Acumulado até aqui:{' '}
-              <span className="figures text-ink-soft">{formatCents(accumulatedCents)}</span>
-            </>
-          )}
-          {hasPlanned && (
-            <>
-              {hasHistory && ' · '}
-              Com o previsto:{' '}
-              <span className="figures text-ink-soft">{formatCents(projectedBalanceCents)}</span>
-            </>
-          )}
-        </p>
+        <div className="relative flex flex-col gap-1">
+          <ColumnLabel>Saldo de {formatMonthLong(month).replace(' de ', ' · ')}</ColumnLabel>
+          <p
+            className={`figures font-display text-[42px] font-semibold leading-none tracking-[-0.035em] ${
+              positive ? 'text-ink' : 'text-saida'
+            }`}
+          >
+            {formatCents(balanceCents)}
+          </p>
+
+          <p className="mt-1 text-xs text-ink-soft">
+            {hasHistory && (
+              <>
+                Acumulado até aqui:{' '}
+                <span className="figures text-ink-soft">{formatCents(accumulatedCents)}</span>
+              </>
+            )}
+            {hasPlanned && (
+              <>
+                {hasHistory && ' · '}
+                Com o previsto:{' '}
+                <span className="figures text-ink-soft">{formatCents(projectedBalanceCents)}</span>
+              </>
+            )}
+          </p>
+        </div>
 
         {!vazio && (
-          <div className="mt-4">
+          <div className="relative mt-[18px]">
             <Meter
               incomeCents={incomeCents}
               expenseCents={expenseCents}
@@ -95,24 +116,28 @@ export function MonthSummary({
             )}
           </div>
         )}
-      </div>
+      </section>
 
-      <dl className="mt-4 grid grid-cols-2 border-t border-rule">
-        <div className="border-r border-rule px-4 py-3">
+      {/* Entrou e saiu ganham cartão próprio, cada um com o tom da sua
+          semântica: a distinção deixa de depender só da cor do número. */}
+      <dl className="flex gap-2.5">
+        <div
+          className="flex flex-1 flex-col gap-1 rounded-md border p-3.5"
+          style={{ background: 'var(--surface-stat-in)', borderColor: 'var(--surface-stat-in-border)' }}
+        >
           <dt>
             <ColumnLabel>Entrou</ColumnLabel>
           </dt>
-          <dd className="figures mt-0.5 text-lg font-medium text-entrada">
-            {formatCents(incomeCents)}
-          </dd>
+          <dd className="figures text-lg font-medium text-entrada">{formatCents(incomeCents)}</dd>
         </div>
-        <div className="px-4 py-3">
+        <div
+          className="flex flex-1 flex-col gap-1 rounded-md border p-3.5"
+          style={{ background: 'var(--surface-stat-out)', borderColor: 'var(--surface-stat-out-border)' }}
+        >
           <dt>
             <ColumnLabel>Saiu</ColumnLabel>
           </dt>
-          <dd className="figures mt-0.5 text-lg font-medium text-saida">
-            {formatCents(expenseCents)}
-          </dd>
+          <dd className="figures text-lg font-medium text-saida">{formatCents(expenseCents)}</dd>
         </div>
       </dl>
 
@@ -125,6 +150,6 @@ export function MonthSummary({
       />
 
       <MonthTrend stats={stats} month={month} />
-    </section>
+    </div>
   );
 }

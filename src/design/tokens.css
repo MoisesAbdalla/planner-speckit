@@ -49,6 +49,24 @@
   --color-atencao: #8a5f1c;
   --color-atencao-wash: #f6efe2;
 
+  /*
+    Superfícies da composição do resumo.
+
+    O cartão do saldo tem gradiente e um brilho atrás; os demais são planos,
+    com borda. Cada um tem par nos dois temas — o desenho nasceu no escuro,
+    mas o claro não pode virar sobra dele.
+  */
+  --surface-card: #ffffff;
+  --surface-card-border: #e7e4db;
+  --surface-hero: linear-gradient(160deg, #ffffff 0%, #f8f6f2 55%, #f3f0ea 100%);
+  --surface-hero-border: #e2ded4;
+  --surface-hero-glow: radial-gradient(circle, rgb(31 111 92 / 0.10) 0%, rgb(31 111 92 / 0) 70%);
+  --surface-stat-in: #eef5f2;
+  --surface-stat-in-border: #d8e7e1;
+  --surface-stat-out: #f8eef0;
+  --surface-stat-out-border: #ecd9dd;
+  --surface-track: #ece8e1;
+
   /* — Tipografia ——————————————————————————————— */
   --font-display: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
   --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -169,6 +187,17 @@
   --color-acao-wash: #131c29;
   --color-atencao: #d9a85a;
   --color-atencao-wash: #2a2010;
+
+  --surface-card: #0c0c0d;
+  --surface-card-border: #1c1c1e;
+  --surface-hero: linear-gradient(160deg, #16211f 0%, #101416 55%, #0c0c0d 100%);
+  --surface-hero-border: #23282a;
+  --surface-hero-glow: radial-gradient(circle, rgb(79 169 143 / 0.2) 0%, rgb(79 169 143 / 0) 70%);
+  --surface-stat-in: #101312;
+  --surface-stat-in-border: #1d2422;
+  --surface-stat-out: #131011;
+  --surface-stat-out-border: #241c1f;
+  --surface-track: #151515;
 
   /* Mesmos matizes, repassados para a superfície escura e revalidados. */
   --color-cat-1: #5b8fd9;
@@ -326,6 +355,25 @@
 
 @utility animate-settle {
   animation: settle-in var(--ease-settle) var(--ease-out) both;
+}
+
+/*
+  Barra de categoria: o matiz validado, clareado na ponta.
+
+  O gradiente é derivado com color-mix da própria cor do slot, então uma
+  troca de paleta continua valendo aqui sem editar nada — e a cor de base
+  segue sendo a que passou nas seis checagens.
+*/
+@utility cat-bar {
+  background: linear-gradient(
+    90deg,
+    var(--cat) 0%,
+    color-mix(in oklab, var(--cat) 72%, white) 100%
+  );
+}
+
+@utility meter-bar {
+  background: linear-gradient(90deg, var(--color-saida) 0%, var(--color-atencao) 100%);
 }
 
 @utility ledger-rule {

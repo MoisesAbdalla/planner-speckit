@@ -36,10 +36,13 @@ export function CategoryBreakdown({
 }: CategoryBreakdownProps) {
   if (slices.length === 0 || expenseCents === 0) {
     return (
-      <div className="border-t border-rule px-4 py-4">
+      <section
+        className="rounded-md border px-4 py-4"
+        style={{ background: 'var(--surface-card)', borderColor: 'var(--surface-card-border)' }}
+      >
         <ColumnLabel>Para onde foi</ColumnLabel>
         <p className="mt-1 text-sm text-ink-soft">Nenhum gasto efetivado ainda neste mês.</p>
-      </div>
+      </section>
     );
   }
 
@@ -47,17 +50,15 @@ export function CategoryBreakdown({
   const maior = dobradas[0]?.cents ?? 1;
 
   return (
-    <div className="border-t border-rule px-4 py-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <ColumnLabel>Para onde foi</ColumnLabel>
-        {dobradas.length > 1 && (
-          <span className="text-xs text-ink-faint">
-            {dobradas[0]!.name} lidera com {Math.round(dobradas[0]!.share * 100)}%
-          </span>
-        )}
-      </div>
+    <section
+      className="rounded-md border px-4 py-4"
+      style={{ background: 'var(--surface-card)', borderColor: 'var(--surface-card-border)' }}
+    >
+      {/* O "X lidera com Y%" saiu: com o percentual em corpo grande na frente
+          de cada linha, a frase virava repetição do que já se lê de relance. */}
+      <ColumnLabel>Para onde foi</ColumnLabel>
 
-      <ul className="mt-2 flex flex-col">
+      <ul className="mt-3 flex flex-col">
         {dobradas.map((slice) => {
           // "Outros" agrega categorias diferentes — não tem meta própria.
           const agregada = slice.categoryId === OTHER_CATEGORY_ID;
@@ -98,7 +99,7 @@ export function CategoryBreakdown({
                     : slice.name
               }
               value={formatCents(slice.cents)}
-              hint={`${Math.round(slice.share * 100)}%`}
+              share={slice.share}
               limitAt={limitAt}
               limitLabel={consumo ? `Meta ${formatCents(consumo.goalCents)}` : ''}
               statusLabel={statusLabel}
@@ -107,6 +108,6 @@ export function CategoryBreakdown({
           );
         })}
       </ul>
-    </div>
+    </section>
   );
 }

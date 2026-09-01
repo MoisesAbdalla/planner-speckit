@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { LimitMark } from './LimitMark';
 
 interface BarRowProps {
@@ -7,8 +8,8 @@ interface BarRowProps {
   color: string;
   /** Valor formatado, alinhado na coluna tabular. */
   value: string;
-  /** Percentual, quando ajuda a leitura. */
-  hint?: string;
+  /** Fração do total, de 0 a 1 — vira o percentual em corpo grande. */
+  share?: number;
   /** Onde a meta cai na escala da barra, de 0 a 1. Ausente = sem meta. */
   limitAt?: number | null;
   /** Rótulo da marca, para quem passa o ponteiro. */
@@ -19,21 +20,26 @@ interface BarRowProps {
 }
 
 /**
- * Barra horizontal com rótulo direto.
+ * Linha de categoria: percentual em destaque, nome, valor e barra.
  *
- * Horizontal porque os nomes de categoria são longos ("Alimentação",
- * "Transporte") e caberiam mal num eixo vertical. O rótulo fica ao lado da
- * barra, não dentro: dentro ele sumiria nas fatias pequenas.
+ * O percentual lidera em corpo grande porque é ele que responde "para onde
+ * meu dinheiro está indo" sem exigir comparação nenhuma. O valor em reais vem
+ * depois, para quem quer o número exato.
  *
- * O texto usa tokens de tinta, nunca a cor da série — a cor identifica a
- * categoria, o texto precisa ser legível nos dois temas.
+ * Ele usa a cor da categoria, o que só é legítimo neste tamanho: a partir de
+ * 24px em peso forte o piso de contraste cai para 3:1, e a paleta inteira
+ * passa nesse piso nos dois temas. No corpo do texto a mesma cor seria
+ * ilegível — por isso nome e valor continuam em tokens de tinta.
+ *
+ * Horizontal porque os nomes são longos ("Alimentação", "Transporte") e
+ * caberiam mal num eixo vertical.
  */
 export function BarRow({
   label,
   fill,
   color,
   value,
-  hint,
+  share,
   limitAt = null,
   limitLabel = '',
   statusLabel,
@@ -44,27 +50,32 @@ export function BarRow({
   const width = Math.max(fill * 100, 1.5);
 
   return (
-    <li className="flex items-center gap-2 py-1">
+    <li className="flex items-center gap-3 py-1.5">
+      {share !== undefined && (
+        <span
+          className="figures w-14 shrink-0 font-display text-2xl font-bold leading-none tracking-[-0.04em]"
+          style={{ color }}
+        >
+          {Math.round(share * 100)}
+          <span className="text-sm">%</span>
+        </span>
+      )}
+
       <span className="min-w-0 flex-1">
-        <span className="mb-1 flex items-baseline gap-2">
+        <span className="mb-1.5 flex items-baseline gap-2">
           <span className="min-w-0 flex-1 truncate text-sm text-ink">{label}</span>
-          {hint && (
-            <span className="figures w-8 shrink-0 text-right text-xs text-ink-faint">{hint}</span>
-          )}
           {/* Largura fixa: os valores formam uma coluna de verdade, alinhada
-              como na lista de lancamentos. E a linha de razao da caderneta —
-              se o numero flutuar com o tamanho do rotulo, a coluna some. */}
+              como na lista de lançamentos. É a linha de razão da caderneta —
+              se o número flutuar com o tamanho do rótulo, a coluna some. */}
           <span className="figures w-24 shrink-0 text-right text-sm text-ink">{value}</span>
         </span>
 
-        <span className="relative block h-1.5 w-full overflow-hidden rounded-pill bg-paper-sunken">
+        <span className="relative block h-1.5 w-full overflow-hidden rounded-pill bg-[--surface-track]">
           <span
-            className="block h-full rounded-pill transition-[width] duration-300"
-            style={{ width: `${width}%`, backgroundColor: color }}
+            className="cat-bar block h-full rounded-pill transition-[width] duration-[--ease-settle] ease-[--ease-out]"
+            style={{ width: `${width}%`, '--cat': color } as CSSProperties}
           />
-          {limitAt !== null && (
-            <LimitMark at={limitAt} label={limitLabel} tone="atencao" />
-          )}
+          {limitAt !== null && <LimitMark at={limitAt} label={limitLabel} tone="atencao" />}
         </span>
 
         {statusLabel && (

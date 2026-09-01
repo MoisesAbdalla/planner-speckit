@@ -34,10 +34,13 @@ export function TransactionList({
   }, new Map());
 
   return (
-    <ul className="flex flex-col">
+    <ul
+      className="flex flex-col rounded-md border px-4 pb-2"
+      style={{ background: 'var(--surface-card)', borderColor: 'var(--surface-card-border)' }}
+    >
       {[...groups.entries()].map(([date, items]) => (
         <Fragment key={date}>
-          <li className="sticky top-0 z-10 flex items-baseline gap-2 bg-paper/95 px-1 pb-1 pt-4 backdrop-blur">
+          <li className="sticky top-0 z-10 flex items-baseline gap-2 px-1 pb-1 pt-4 backdrop-blur" style={{ background: 'color-mix(in srgb, var(--surface-card) 95%, transparent)' }}>
             <span className="figures text-sm font-medium text-ink">{formatDayShort(date)}</span>
             <span className="text-micro uppercase tracking-[0.08em] text-ink-faint">
               {formatWeekdayShort(date)}
@@ -71,7 +74,7 @@ export function TransactionList({
                 <button
                   type="button"
                   onClick={() => onEdit(tx)}
-                  className="min-w-0 flex-1 text-left"
+                  className="flex min-w-0 flex-1 flex-col gap-0.5 text-left"
                   aria-label={`Editar ${tx.description}`}
                 >
                   <span className={`block truncate text-sm ${planned ? 'text-ink-soft' : 'text-ink'}`}>
@@ -87,7 +90,7 @@ export function TransactionList({
                   <button
                     type="button"
                     onClick={() => onConfirm(tx)}
-                    className="shrink-0 rounded-sm border border-acao/30 px-2 py-1 text-xs font-medium text-acao transition-[background-color,transform] duration-[--ease-snap] ease-[--ease-out] hover:bg-acao-wash active:scale-95"
+                    className="shrink-0 rounded-pill border border-acao/35 px-2.5 py-1 text-[11px] font-medium tracking-[0.02em] text-acao transition-[background-color,transform] duration-[--ease-snap] ease-[--ease-out] hover:bg-acao-wash active:scale-95"
                   >
                     Confirmar
                   </button>
