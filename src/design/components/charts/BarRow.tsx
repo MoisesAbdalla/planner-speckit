@@ -1,3 +1,5 @@
+import { LimitMark } from './LimitMark';
+
 interface BarRowProps {
   label: string;
   /** Fração de 0 a 1 — a barra é proporcional à maior da lista. */
@@ -7,6 +9,13 @@ interface BarRowProps {
   value: string;
   /** Percentual, quando ajuda a leitura. */
   hint?: string;
+  /** Onde a meta cai na escala da barra, de 0 a 1. Ausente = sem meta. */
+  limitAt?: number | null;
+  /** Rótulo da marca, para quem passa o ponteiro. */
+  limitLabel?: string;
+  /** Texto do estado — a leitura não pode depender de cor (FR-014). */
+  statusLabel?: string;
+  statusTone?: 'atencao' | 'saida';
 }
 
 /**
@@ -19,7 +28,17 @@ interface BarRowProps {
  * O texto usa tokens de tinta, nunca a cor da série — a cor identifica a
  * categoria, o texto precisa ser legível nos dois temas.
  */
-export function BarRow({ label, fill, color, value, hint }: BarRowProps) {
+export function BarRow({
+  label,
+  fill,
+  color,
+  value,
+  hint,
+  limitAt = null,
+  limitLabel = '',
+  statusLabel,
+  statusTone,
+}: BarRowProps) {
   // Toda barra tem uma sobra mínima visível: uma categoria com 0,3% do total
   // não pode desaparecer da lista.
   const width = Math.max(fill * 100, 1.5);
@@ -38,12 +57,25 @@ export function BarRow({ label, fill, color, value, hint }: BarRowProps) {
           <span className="figures w-24 shrink-0 text-right text-sm text-ink">{value}</span>
         </span>
 
-        <span className="block h-1.5 w-full overflow-hidden rounded-pill bg-paper-sunken">
+        <span className="relative block h-1.5 w-full overflow-hidden rounded-pill bg-paper-sunken">
           <span
             className="block h-full rounded-pill transition-[width] duration-300"
             style={{ width: `${width}%`, backgroundColor: color }}
           />
+          {limitAt !== null && (
+            <LimitMark at={limitAt} label={limitLabel} tone="atencao" />
+          )}
         </span>
+
+        {statusLabel && (
+          <span
+            className={`mt-1 block text-xs ${
+              statusTone === 'saida' ? 'text-saida' : 'text-atencao'
+            }`}
+          >
+            {statusLabel}
+          </span>
+        )}
       </span>
     </li>
   );

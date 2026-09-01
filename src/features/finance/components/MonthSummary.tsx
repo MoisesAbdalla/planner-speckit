@@ -3,8 +3,9 @@ import { ColumnLabel } from '../../../design/components/Card';
 import { Meter } from '../../../design/components/charts/Meter';
 import { CategoryBreakdown } from './CategoryBreakdown';
 import { MonthTrend } from './MonthTrend';
+import { goalConsumption, hasMonthOverride, resolveGoal } from '../lib/goals';
 import type { MonthSummary as Summary } from '../lib/summary';
-import type { MonthStats } from '../types';
+import type { BudgetGoal, MonthStats } from '../types';
 import type { ISOMonth } from '../../../shared/dates';
 
 interface MonthSummaryProps {
@@ -13,6 +14,10 @@ interface MonthSummaryProps {
   hasHistory: boolean;
   stats: Record<ISOMonth, MonthStats>;
   month: ISOMonth;
+  /** Teto do mês, quando definido. Sem ele, nada muda na tela. */
+  overallGoal?: BudgetGoal;
+  /** Meta de uma categoria, quando definida. */
+  goalFor?: (categoryId: string) => BudgetGoal | undefined;
 }
 
 /**
@@ -28,11 +33,27 @@ export function MonthSummary({
   hasHistory,
   stats,
   month,
+  overallGoal,
+  goalFor,
 }: MonthSummaryProps) {
   const { balanceCents, incomeCents, expenseCents, projectedBalanceCents } = summary;
   const positive = balanceCents >= 0;
   const hasPlanned = summary.plannedCount > 0;
   const vazio = incomeCents === 0 && expenseCents === 0 && !hasPlanned;
+
+  // Sem teto, o resumo renderiza exatamente o que renderizava antes: nenhum
+  // espaço vazio, nenhum convite (FR-020, SC-008).
+  const tetoCents = resolveGoal(overallGoal, month);
+  const consumo =
+    tetoCents === null
+      ? null
+      : goalConsumption({
+          goalCents: tetoCents,
+          usedCents: expenseCents,
+          plannedCents: summary.plannedExpenseCents,
+          incomeCents,
+        });
+  const tetoAjustado = hasMonthOverride(overallGoal, month);
 
   return (
     <section className="rounded-md border border-rule bg-paper-raised shadow-raised">
@@ -64,7 +85,14 @@ export function MonthSummary({
               incomeCents={incomeCents}
               expenseCents={expenseCents}
               plannedExpenseCents={summary.plannedExpenseCents}
+              goal={consumo}
             />
+            {consumo && (
+              <p className="mt-1 text-xs text-ink-faint">
+                Meta de <span className="figures">{formatCents(consumo.goalCents)}</span>
+                {tetoAjustado && ' · ajuste só deste mês'}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -88,7 +116,13 @@ export function MonthSummary({
         </div>
       </dl>
 
-      <CategoryBreakdown slices={summary.byCategory} expenseCents={expenseCents} />
+      <CategoryBreakdown
+        slices={summary.byCategory}
+        expenseCents={expenseCents}
+        month={month}
+        plannedByCategory={summary.plannedByCategory}
+        goalFor={goalFor}
+      />
 
       <MonthTrend stats={stats} month={month} />
     </section>

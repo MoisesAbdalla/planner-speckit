@@ -68,12 +68,12 @@ antes de estourar e destacando o excesso.
 conferir o sinal de aproximação; passar de 100% e conferir o destaque de
 excesso, com o quanto passou.
 
-- [ ] T009 [P] [US1] Aplicar a marca e os estados de aproximação e excesso em src/design/components/charts/Meter.tsx, e **trocar a escala quando existe meta**: a barra passa a medir gasto ÷ meta e a entrada do mês vira marca sobre ela; sem meta, continua gasto ÷ entrada (research R8). Nada pode depender só de cor (FR-014)
-- [ ] T010 [US1] Implementar o modal de metas em src/features/finance/components/BudgetGoalsManager.tsx com o campo do teto geral, aceitando valor zero e rejeitando negativo (FR-007)
-- [ ] T011 [US1] Abrir o modal a partir da tela de finanças em src/routes/Finance.tsx, ao lado das entradas de categorias e recorrências, mantendo a definição da primeira meta em no máximo 3 interações (SC-003)
-- [ ] T012 [US1] Exibir o consumo do teto no medidor em src/features/finance/components/MonthSummary.tsx, incluindo o previsto ainda não confirmado e distinguindo-o do efetivado (FR-015)
-- [ ] T013 [US1] Escrever o rótulo textual dos três estados em src/features/finance/components/MonthSummary.tsx — quanto sobra, "perto do limite" e "passou em R$ X" — para que a leitura não dependa da cor
-- [ ] T014 [US1] Garantir que sem teto definido o resumo renderize exatamente o que renderizava antes, sem espaço vazio nem convite, em src/features/finance/components/MonthSummary.tsx (FR-020, SC-008)
+- [X] T009 [P] [US1] Aplicar a marca e os estados de aproximação e excesso em src/design/components/charts/Meter.tsx, e **trocar a escala quando existe meta**: a barra passa a medir gasto ÷ meta e a entrada do mês vira marca sobre ela; sem meta, continua gasto ÷ entrada (research R8). Nada pode depender só de cor (FR-014)
+- [X] T010 [US1] Implementar o modal de metas em src/features/finance/components/BudgetGoalsManager.tsx com o campo do teto geral, aceitando valor zero e rejeitando negativo (FR-007)
+- [X] T011 [US1] Abrir o modal a partir da tela de finanças em src/routes/Finance.tsx, ao lado das entradas de categorias e recorrências, mantendo a definição da primeira meta em no máximo 3 interações (SC-003)
+- [X] T012 [US1] Exibir o consumo do teto no medidor em src/features/finance/components/MonthSummary.tsx, incluindo o previsto ainda não confirmado e distinguindo-o do efetivado (FR-015)
+- [X] T013 [US1] Escrever o rótulo textual dos três estados em src/features/finance/components/MonthSummary.tsx — quanto sobra, "perto do limite" e "passou em R$ X" — para que a leitura não dependa da cor
+- [X] T014 [US1] Garantir que sem teto definido o resumo renderize exatamente o que renderizava antes, sem espaço vazio nem convite, em src/features/finance/components/MonthSummary.tsx (FR-020, SC-008)
 
 **Checkpoint**: US1 entregável — o teto do mês já muda comportamento sozinho
 
@@ -88,12 +88,12 @@ categoria em risco identificável de relance.
 abaixo na outra, e conferir que a lista identifica qual estourou sem comparar
 números.
 
-- [ ] T015 [P] [US2] Aplicar o primitivo de marca em src/design/components/charts/BarRow.tsx, com a mesma gramática do medidor
-- [ ] T016 [US2] Acrescentar os campos de meta por categoria ao modal em src/features/finance/components/BudgetGoalsManager.tsx, listando as categorias não arquivadas
-- [ ] T017 [US2] Avisar quando as metas por categoria somarem mais que o teto geral em src/features/finance/components/BudgetGoalsManager.tsx, **sem impedir o salvamento** (FR-009)
-- [ ] T018 [US2] Exibir o consumo de cada meta nas barras em src/features/finance/components/CategoryBreakdown.tsx, com rótulo textual do estado e o previsto distinguido do efetivado — mesma base do teto geral (FR-015)
-- [ ] T019 [US2] Manter as categorias sem meta exatamente como estão hoje — sem alerta e sem aparência de pendência — em src/features/finance/components/CategoryBreakdown.tsx (FR-016)
-- [ ] T020 [US2] Parar de cobrar a meta de categoria arquivada, preservando o documento e o histórico, em src/features/finance/lib/goals.ts e src/features/finance/components/CategoryBreakdown.tsx (FR-021)
+- [X] T015 [P] [US2] Aplicar o primitivo de marca em src/design/components/charts/BarRow.tsx, com a mesma gramática do medidor
+- [X] T016 [US2] Acrescentar os campos de meta por categoria ao modal em src/features/finance/components/BudgetGoalsManager.tsx, listando as categorias não arquivadas
+- [X] T017 [US2] Avisar quando as metas por categoria somarem mais que o teto geral em src/features/finance/components/BudgetGoalsManager.tsx, **sem impedir o salvamento** (FR-009)
+- [X] T018 [US2] Exibir o consumo de cada meta nas barras em src/features/finance/components/CategoryBreakdown.tsx, com rótulo textual do estado e o previsto distinguido do efetivado — mesma base do teto geral (FR-015)
+- [X] T019 [US2] Manter as categorias sem meta exatamente como estão hoje — sem alerta e sem aparência de pendência — em src/features/finance/components/CategoryBreakdown.tsx (FR-016)
+- [X] T020 [US2] Parar de cobrar a meta de categoria arquivada, preservando o documento e o histórico, em src/features/finance/lib/goals.ts e src/features/finance/components/CategoryBreakdown.tsx (FR-021)
 
 **Checkpoint**: US1 e US2 funcionam de forma independente
 
@@ -108,9 +108,9 @@ tocar no passado.
 conferir que o mês seguinte volta ao padrão e que alterar o padrão não muda
 nenhum mês passado.
 
-- [ ] T021 [US3] Acrescentar o ajuste do mês visualizado ao modal em src/features/finance/components/BudgetGoalsManager.tsx, separado do campo do padrão para que as duas intenções não se confundam
-- [ ] T022 [US3] Implementar o desfazer do ajuste em src/features/finance/components/BudgetGoalsManager.tsx, devolvendo o mês ao padrão sem tocar nas versões (FR-005)
-- [ ] T023 [US3] Sinalizar na exibição que o valor daquele mês é excepcional, e não o padrão, em src/features/finance/components/MonthSummary.tsx e CategoryBreakdown.tsx
+- [X] T021 [US3] Acrescentar o ajuste do mês visualizado ao modal em src/features/finance/components/BudgetGoalsManager.tsx, separado do campo do padrão para que as duas intenções não se confundam
+- [X] T022 [US3] Implementar o desfazer do ajuste em src/features/finance/components/BudgetGoalsManager.tsx, devolvendo o mês ao padrão sem tocar nas versões (FR-005)
+- [X] T023 [US3] Sinalizar na exibição que o valor daquele mês é excepcional, e não o padrão, em src/features/finance/components/MonthSummary.tsx e CategoryBreakdown.tsx
 - [ ] T024 [US3] Conferir navegando entre meses que o ajuste pertence ao mês e que alterar o padrão não reescreve meses passados, conforme o cenário 5 do bloco 3 de quickstart.md (SC-005, SC-006)
 
 **Checkpoint**: todas as user stories funcionais
@@ -119,9 +119,9 @@ nenhum mês passado.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T025 [P] Verificar que registrar um gasto não passa por nenhum código de meta, em src/features/finance/components/TransactionForm.tsx e src/features/finance/lib/transactionWrites.ts (FR-019, SC-004)
-- [ ] T026 [P] Atualizar README.md com a seção de metas e a regra temporal — alterar o padrão não muda meses passados
-- [ ] T027 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint e o build
+- [X] T025 [P] Verificar que registrar um gasto não passa por nenhum código de meta, em src/features/finance/components/TransactionForm.tsx e src/features/finance/lib/transactionWrites.ts (FR-019, SC-004)
+- [X] T026 [P] Atualizar README.md com a seção de metas e a regra temporal — alterar o padrão não muda meses passados
+- [X] T027 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint e o build
 - [ ] T028 Verificar os três estados em escala de cinza e sob deuteranopia no DevTools, sobre src/features/finance/components/MonthSummary.tsx e CategoryBreakdown.tsx (SC-007)
 - [ ] T029 Percorrer as telas nas quatro combinações — tema claro e escuro × ~375px e ~1280px — conferindo o modal de metas e os dois pontos de exibição
 - [ ] T030 Executar os quatro blocos de validação manual de quickstart.md

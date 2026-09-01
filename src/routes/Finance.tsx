@@ -9,11 +9,13 @@ import { TransactionForm } from '../features/finance/components/TransactionForm'
 import { CategoryManager } from '../features/finance/components/CategoryManager';
 import { RecurrenceList } from '../features/finance/components/RecurrenceList';
 import { RecurrenceForm } from '../features/finance/components/RecurrenceForm';
+import { BudgetGoalsManager } from '../features/finance/components/BudgetGoalsManager';
 import { useTransactions } from '../features/finance/hooks/useTransactions';
 import { useCategories } from '../features/finance/hooks/useCategories';
 import { useAccumulated } from '../features/finance/hooks/useAccumulated';
 import { useRecurrences } from '../features/finance/hooks/useRecurrences';
 import { useMaterialization } from '../features/finance/hooks/useMaterialization';
+import { useBudgetGoals } from '../features/finance/hooks/useBudgetGoals';
 import { summarizeMonth } from '../features/finance/lib/summary';
 import {
   confirmTransaction,
@@ -33,6 +35,7 @@ export function FinancePage() {
   const { categories, loading: loadingCategories } = useCategories(uid);
   const { accumulatedCents, stats, hasHistory } = useAccumulated(uid, month);
   const { recurrences, active: activeRecurrences } = useRecurrences(uid);
+  const { goals, overall: overallGoal, forCategory } = useBudgetGoals(uid);
 
   useMaterialization(uid, activeRecurrences, month, !loadingCategories);
 
@@ -41,11 +44,21 @@ export function FinancePage() {
     [transactions, categories],
   );
 
+  // Arquivar uma categoria interrompe a cobranca da meta dela, mas o
+  // documento permanece — o historico dos meses passados continua intacto
+  // e reativar a categoria devolve a meta como estava (FR-021).
+  const goalForActive = useMemo(() => {
+    const arquivadas = new Set(categories.filter((c) => c.archived).map((c) => c.id));
+    return (categoryId: string) =>
+      arquivadas.has(categoryId) ? undefined : forCategory(categoryId);
+  }, [categories, forCategory]);
+
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState<Transaction | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [recurrencesOpen, setRecurrencesOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
   const [recurrenceForm, setRecurrenceForm] = useState<{ open: boolean; editing: Recurrence | null }>(
     { open: false, editing: null },
   );
@@ -79,6 +92,9 @@ export function FinancePage() {
           <Button variant="secondary" size="sm" onClick={() => setRecurrencesOpen(true)}>
             Contas que se repetem
           </Button>
+          <Button variant="secondary" size="sm" onClick={() => setGoalsOpen(true)}>
+            Metas
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setCategoriesOpen(true)}>
             Categorias
           </Button>
@@ -91,6 +107,8 @@ export function FinancePage() {
         hasHistory={hasHistory}
         stats={stats}
         month={month}
+        overallGoal={overallGoal}
+        goalFor={goalForActive}
       />
 
       <section>
@@ -185,6 +203,15 @@ export function FinancePage() {
           setRecurrencesOpen(false);
           setRecurrenceForm({ open: true, editing: recurrence });
         }}
+      />
+
+      <BudgetGoalsManager
+        open={goalsOpen}
+        uid={uid}
+        month={month}
+        categories={categories}
+        goals={goals}
+        onClose={() => setGoalsOpen(false)}
       />
 
       <RecurrenceForm

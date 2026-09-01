@@ -1,54 +1,88 @@
 import { formatCents } from '../../../shared/money';
+import { LimitMark } from './LimitMark';
+import type { GoalConsumption } from '../../../features/finance/types';
 
 interface MeterProps {
-  /** O que entrou — o limite contra o qual a saída é lida. */
+  /** O que entrou no mês. */
   incomeCents: number;
   /** O que já saiu, efetivado. */
   expenseCents: number;
   /** O que ainda deve sair, previsto e não confirmado. */
   plannedExpenseCents?: number;
+  /** Teto do mês, quando definido. Muda a escala da barra. */
+  goal?: GoalConsumption | null;
 }
 
 /**
- * Medidor: quanto do que entrou já saiu.
+ * Medidor: quanto do limite do mês já foi usado.
  *
- * O dado é uma razão contra um limite, e não partes de um todo — por isso um
- * medidor, e não uma pizza de duas fatias. O previsto estende a barra em peso
- * leve, porque a pergunta que a pessoa faz aqui é "quanto ainda posso
- * gastar", e ela precisa contar com o que já está comprometido.
+ * **A escala depende de haver meta.** Sem teto, a barra mede gasto ÷ entrada,
+ * e a pergunta é "quanto da minha renda já gastei". Com teto, ela mede
+ * gasto ÷ meta, e a pergunta passa a ser "quanto do que eu me permiti já
+ * foi" — a entrada vira uma marca sobre a barra.
+ *
+ * O denominador acompanha a pergunta porque, do contrário, o número em
+ * destaque responderia a outra coisa. E é uma escala só: duas referências no
+ * mesmo desenho seria eixo duplo.
+ *
+ * O dado é uma razão contra um limite, não partes de um todo — por isso um
+ * medidor, e não uma pizza de duas fatias.
  */
-export function Meter({ incomeCents, expenseCents, plannedExpenseCents = 0 }: MeterProps) {
-  const overspent = expenseCents > incomeCents;
-  const semEntrada = incomeCents === 0;
+export function Meter({
+  incomeCents,
+  expenseCents,
+  plannedExpenseCents = 0,
+  goal = null,
+}: MeterProps) {
+  const comMeta = goal !== null;
+  const overspent = comMeta ? goal.state === 'over' : expenseCents > incomeCents;
+  const semBase = comMeta ? goal.goalCents === 0 : incomeCents === 0;
 
-  // Sem entrada não há proporção a calcular: qualquer gasto já é excesso.
-  const base = semEntrada ? Math.max(expenseCents + plannedExpenseCents, 1) : incomeCents;
+  const base = comMeta
+    ? goal.goalCents || Math.max(expenseCents + plannedExpenseCents, 1)
+    : semBase
+      ? Math.max(expenseCents + plannedExpenseCents, 1)
+      : incomeCents;
+
   const usado = Math.min(expenseCents / base, 1);
   const previsto = Math.min(plannedExpenseCents / base, Math.max(0, 1 - usado));
+  const percentual = semBase ? 100 : Math.round((expenseCents / base) * 100);
 
-  const percentual = semEntrada ? 100 : Math.round((expenseCents / incomeCents) * 100);
-  const sobra = incomeCents - expenseCents - plannedExpenseCents;
+  const sobra = comMeta
+    ? goal.remainingCents
+    : incomeCents - expenseCents - plannedExpenseCents;
 
-  const resumo =
-    semEntrada && expenseCents === 0
+  const resumo = comMeta
+    ? semBase && expenseCents === 0
+      ? 'Meta de nenhum gasto, e nada gasto ainda.'
+      : goal.state === 'over'
+        ? `Passou da meta em ${formatCents(Math.abs(goal.remainingCents + plannedExpenseCents))}. Meta de ${formatCents(goal.goalCents)}, gasto de ${formatCents(expenseCents)}.`
+        : `Gasto de ${formatCents(expenseCents)} de uma meta de ${formatCents(goal.goalCents)}, ${percentual}%.` +
+          (plannedExpenseCents > 0 ? ` Ainda previsto: ${formatCents(plannedExpenseCents)}.` : '')
+    : semBase && expenseCents === 0
       ? 'Nenhuma movimentação neste mês.'
-      : overspent || semEntrada
+      : overspent || semBase
         ? `Saiu ${formatCents(expenseCents)} contra ${formatCents(incomeCents)} que entrou — ${percentual}% do que entrou.`
         : `Saiu ${formatCents(expenseCents)} de ${formatCents(incomeCents)} que entrou, ${percentual}%.` +
-          (plannedExpenseCents > 0
-            ? ` Ainda previsto: ${formatCents(plannedExpenseCents)}.`
-            : '');
+          (plannedExpenseCents > 0 ? ` Ainda previsto: ${formatCents(plannedExpenseCents)}.` : '');
+
+  const trilho =
+    comMeta && goal.state === 'over'
+      ? 'bg-saida-wash'
+      : comMeta && goal.state === 'near'
+        ? 'bg-atencao-wash'
+        : overspent
+          ? 'bg-saida-wash'
+          : 'bg-paper-sunken';
 
   return (
     <div>
       {/* O dado também existe em texto, para leitor de tela e para quem não
-          distingue as cores (FR-013). */}
+          distingue as cores (FR-013, FR-014). */}
       <p className="sr-only">{resumo}</p>
 
       <div
-        className={`flex h-2.5 w-full overflow-hidden rounded-pill ${
-          overspent ? 'bg-saida-wash' : 'bg-paper-sunken'
-        }`}
+        className={`relative flex h-2.5 w-full overflow-hidden rounded-pill ${trilho}`}
         role="img"
         aria-label={resumo}
       >
@@ -66,10 +100,36 @@ export function Meter({ incomeCents, expenseCents, plannedExpenseCents = 0 }: Me
             />
           </>
         )}
+
+        {/* Com meta, a entrada do mês vira referência sobre a barra. */}
+        {comMeta && goal.incomeMark !== null && (
+          <LimitMark at={goal.incomeMark} label={`Entrou ${formatCents(incomeCents)}`} />
+        )}
       </div>
 
       <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2 text-xs text-ink-soft">
-        {overspent || semEntrada ? (
+        {comMeta ? (
+          goal.state === 'over' ? (
+            <span className="font-medium text-saida">
+              Passou da meta
+              {' · '}
+              <span className="figures">{formatCents(expenseCents - goal.goalCents)}</span> a mais
+            </span>
+          ) : (
+            <>
+              <span className={goal.state === 'near' ? 'font-medium text-atencao' : undefined}>
+                <span className="figures">{percentual}%</span> da meta
+                {goal.state === 'near' && ' · perto do limite'}
+              </span>
+              {sobra !== 0 && (
+                <span className="text-ink-faint">
+                  sobra <span className="figures">{formatCents(sobra)}</span>
+                  {plannedExpenseCents > 0 && ' após o previsto'}
+                </span>
+              )}
+            </>
+          )
+        ) : overspent || semBase ? (
           <span className="font-medium text-saida">
             Saiu mais do que entrou
             {incomeCents > 0 && (

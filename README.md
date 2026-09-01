@@ -119,6 +119,25 @@ as cores de categoria ficam fora do bloco `@theme` (senão o Tailwind as
 descarta), e utilitários condicionais de tema (`dark:`) são proibidos nos
 componentes — a decisão de tema vive só na camada de tokens.
 
+## Metas de orçamento
+
+Defina um teto para o mês e metas por categoria pelo botão **Metas**, na tela
+de finanças. O app avisa a partir de 80% do limite e destaca quando passa.
+
+**A meta é uma linha do tempo, não um número.** Ela guarda o histórico dos
+valores com o mês em que cada um passou a valer, mais exceções de meses
+atípicos. Por isso mudar a meta hoje **não** altera como um mês passado foi
+avaliado — cada mês encontra o valor que valia à época. Se você mexer nessa
+lógica, o teste em `tests/unit/goals.test.ts` marcado como *o teste central da
+feature* é o que impede a regressão.
+
+Dois estados que nunca podem se confundir: **sem meta** (não há limite) e
+**meta zero** (o limite é zero, e qualquer gasto já passa).
+
+O valor não negativo é validado pelo app, não pelas regras do Firestore — elas
+não iteram listas, e achatar a estrutura para permitir isso custaria o
+histórico por mês.
+
 ## Decisões que valem saber
 
 **Dinheiro é inteiro em centavos.** Nenhum valor passa por ponto flutuante:
