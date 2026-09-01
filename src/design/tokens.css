@@ -1,24 +1,31 @@
 @import 'tailwindcss';
 
 /*
-  Sistema de design "Caderneta".
+  Sistema de design "Caderneta" — dois temas.
 
   A referência é o caderno de contas: uma coluna de valores alinhados sobre
-  fios finos. Daí vêm as três decisões que sustentam tudo:
+  fios finos. Daí vêm as decisões que sustentam tudo:
 
   1. Fio (rule) é o elemento estrutural — separa lançamentos sem caixas.
   2. Figuras tabulares em monoespaçada — valores alinham na mesma coluna.
   3. Previsto x efetivado é estrutura, não emblema: fio tracejado e figura
      em peso leve para o que ainda não aconteceu.
+
+  Todo token é nomeado pelo PAPEL que exerce, nunca pela cor que tem. Cada
+  tema fornece seu próprio valor para o mesmo papel, e nenhum componente
+  precisa perguntar "estou no escuro?" — ele pede --color-ink e recebe o
+  certo. Por isso utilitários condicionais (dark:bg-...) são proibidos nos
+  componentes: a decisão de tema vive só aqui.
+
+  Contraste verificado por cálculo nos dois temas: ink ≥ 13:1, e todos os
+  demais tokens de texto ≥ 4,5:1 sobre papel, cartão e superfície rebaixada.
 */
 
 @theme {
-  /* — Cor ————————————————————————————————————— */
-  /* Contraste sobre --color-paper: ink 15.6:1, ink-soft 5.4:1, ink-faint 4.7:1.
-     Nenhum texto fica abaixo de 4.5:1 — inclusive os rótulos pequenos. */
+  /* — Cor: tema claro (padrão) ————————————————— */
   --color-ink: #16211d;
   --color-ink-soft: #5a6a64;
-  --color-ink-faint: #67736d;
+  --color-ink-faint: #646f6a;
 
   --color-paper: #fbf9f5;
   --color-paper-raised: #ffffff;
@@ -38,9 +45,28 @@
   --color-acao-hover: #243a61;
   --color-acao-wash: #e9edf5;
 
-  /* Atenção: atrasado, vencido */
+  /* Atenção: atrasado, vencido, excedido */
   --color-atencao: #8a5f1c;
   --color-atencao-wash: #f6efe2;
+
+  /*
+    Paleta de categorias — validada pelas seis checagens de visualização de
+    dados (`npm run validate:palette`). Ordem fixa, nunca ciclada: um nono
+    matiz seria indistinguível dos existentes sob daltonismo, então a cauda
+    dobra em "Outros".
+
+    A paleta anterior foi escolhida a olho e tinha ΔE 1,9 entre duas
+    categorias — praticamente a mesma cor para quem tem deuteranopia.
+  */
+  --color-cat-1: #2c5fa8;
+  --color-cat-2: #c4562a;
+  --color-cat-3: #1b8a6b;
+  --color-cat-4: #b07c0a;
+  --color-cat-5: #a8477e;
+  --color-cat-6: #4f7a1f;
+  --color-cat-7: #5b46b5;
+  --color-cat-8: #c93f42;
+  --color-cat-other: var(--color-ink-faint);
 
   /* — Tipografia ——————————————————————————————— */
   --font-display: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
@@ -72,6 +98,56 @@
 
   --shadow-raised: 0 1px 2px rgb(22 33 29 / 0.05), 0 1px 1px rgb(22 33 29 / 0.04);
   --shadow-float: 0 8px 24px rgb(22 33 29 / 0.1), 0 2px 6px rgb(22 33 29 / 0.06);
+}
+
+/*
+  Tema escuro — escolhido, não invertido.
+
+  As cores foram medidas contra a superfície escura, não derivadas por
+  fórmula do tema claro: uma inversão automática destruiria as semânticas de
+  entrada e saída e jogaria os matizes das categorias fora da banda de
+  luminosidade legível.
+
+  O atributo data-theme é escrito antes da primeira pintura pelo script do
+  index.html, então não existe quadro no tema errado.
+*/
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-ink: #edeae3;
+  --color-ink-soft: #a8b3ad;
+  --color-ink-faint: #8a968f;
+
+  --color-paper: #121a18;
+  --color-paper-raised: #16211d;
+  --color-paper-sunken: #0e1614;
+
+  --color-rule: #293632;
+  --color-rule-strong: #3c4b46;
+
+  --color-entrada: #4fa98f;
+  --color-entrada-wash: #16302a;
+  --color-saida: #d98a97;
+  --color-saida-wash: #352025;
+  --color-acao: #8faee0;
+  --color-acao-hover: #a7c1ea;
+  --color-acao-wash: #1b2637;
+  --color-atencao: #d9a85a;
+  --color-atencao-wash: #332814;
+
+  /* Mesmos matizes, repassados para a superfície escura e revalidados. */
+  --color-cat-1: #5b8fd9;
+  --color-cat-2: #cf6a3e;
+  --color-cat-3: #239b78;
+  --color-cat-4: #b08618;
+  --color-cat-5: #ce6ea3;
+  --color-cat-6: #6c9636;
+  --color-cat-7: #8e7be0;
+  --color-cat-8: #d65b5d;
+
+  /* Sombra precisa de mais peso no escuro para continuar existindo. */
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 1px rgb(0 0 0 / 0.3);
+  --shadow-float: 0 8px 24px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
 }
 
 @layer base {

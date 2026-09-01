@@ -35,7 +35,12 @@ export interface Category {
   id: string;
   name: string;
   kind: CategoryKind;
-  color: string;
+  /**
+   * Legado: cor gravada pela versao anterior do app. Nao decide mais nada —
+   * a cor vem do slot validado, derivado de `sortOrder` (src/design/palette.ts).
+   * Mantido para nao exigir migracao dos dados ja existentes.
+   */
+  color?: string;
   isDefault: boolean;
   archived: boolean;
   sortOrder: number;
@@ -61,32 +66,19 @@ export interface MonthStats {
   expenseCents: number;
 }
 
-/** Paleta das categorias — tons de mesma família, para a lista não virar arco-íris. */
-export const CATEGORY_COLORS = [
-  '#1F6F5C',
-  '#2F4B7C',
-  '#8C3B4A',
-  '#8A5F1C',
-  '#4A6B57',
-  '#6B4E71',
-  '#31687A',
-  '#8B5E3C',
-] as const;
-
 export interface DefaultCategorySeed {
   name: string;
   kind: CategoryKind;
-  color: string;
 }
 
 /** Semeadas no primeiro acesso (FR-006). */
 export const DEFAULT_CATEGORIES: DefaultCategorySeed[] = [
-  { name: 'Alimentação', kind: 'expense', color: '#1F6F5C' },
-  { name: 'Moradia', kind: 'expense', color: '#2F4B7C' },
-  { name: 'Transporte', kind: 'expense', color: '#31687A' },
-  { name: 'Saúde', kind: 'expense', color: '#8C3B4A' },
-  { name: 'Lazer', kind: 'expense', color: '#6B4E71' },
-  { name: 'Outros', kind: 'expense', color: '#8B5E3C' },
-  { name: 'Salário', kind: 'income', color: '#1F6F5C' },
-  { name: 'Extra', kind: 'income', color: '#8A5F1C' },
+  { name: 'Alimentação', kind: 'expense' },
+  { name: 'Moradia', kind: 'expense' },
+  { name: 'Transporte', kind: 'expense' },
+  { name: 'Saúde', kind: 'expense' },
+  { name: 'Lazer', kind: 'expense' },
+  { name: 'Outros', kind: 'expense' },
+  { name: 'Salário', kind: 'income' },
+  { name: 'Extra', kind: 'income' },
 ];

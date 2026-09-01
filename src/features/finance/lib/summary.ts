@@ -1,4 +1,5 @@
 import type { Category, MonthStats, Transaction } from '../types';
+import { categoryColor, OTHER_COLOR } from '../../../design/palette';
 import type { ISOMonth } from '../../../shared/dates';
 
 /**
@@ -10,6 +11,7 @@ import type { ISOMonth } from '../../../shared/dates';
 export interface CategorySlice {
   categoryId: string;
   name: string;
+  /** Referencia CSS do slot validado — troca de tema sozinha. */
   color: string;
   cents: number;
   /** Fração do total de saídas, de 0 a 1. */
@@ -86,7 +88,7 @@ export function summarizeMonth(
       return {
         categoryId,
         name: category?.name ?? 'Sem categoria',
-        color: category?.color ?? '#8B968F',
+        color: category ? categoryColor(category.sortOrder) : OTHER_COLOR,
         cents,
         share: expenseCents === 0 ? 0 : cents / expenseCents,
       };

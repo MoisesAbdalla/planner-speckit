@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { formatCents } from '../../../shared/money';
+import { categoryColor, OTHER_COLOR } from '../../../design/palette';
 import { formatDayShort, formatWeekdayShort, type ISODate } from '../../../shared/dates';
 import type { Category, Transaction } from '../types';
 
@@ -58,7 +59,7 @@ export function TransactionList({
                   aria-hidden="true"
                   className="h-6 w-1 shrink-0 rounded-pill"
                   style={{
-                    backgroundColor: category?.color ?? '#C6C2B6',
+                    backgroundColor: category ? categoryColor(category.sortOrder) : OTHER_COLOR,
                     opacity: planned ? 0.4 : 1,
                   }}
                 />

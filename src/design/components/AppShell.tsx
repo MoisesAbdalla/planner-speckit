@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router';
 import { useAuth } from '../../features/auth/AuthContext';
 import { useOnlineStatus } from '../../shared/connection';
 import { SetupBanner } from './SetupBanner';
+import { ThemeToggle } from './ThemeToggle';
 
 const NAV = [
   { to: '/planner/dia', label: 'Hoje', short: 'Hoje' },
@@ -29,10 +30,10 @@ function BrandMark() {
     <span className="flex items-center gap-2">
       <svg viewBox="0 0 64 64" className="h-6 w-6" aria-hidden="true">
         <rect width="64" height="64" rx="14" fill="currentColor" />
-        <rect x="14" y="22" width="36" height="3.5" rx="1.75" fill="#FBF9F5" />
-        <rect x="14" y="33" width="14" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
-        <rect x="32" y="33" width="8" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
-        <rect x="14" y="44" width="20" height="3.5" rx="1.75" fill="#4FA98F" />
+        <rect x="14" y="22" width="36" height="3.5" rx="1.75" fill="var(--color-paper)" />
+        <rect x="14" y="33" width="14" height="3.5" rx="1.75" fill="var(--color-paper)" opacity="0.75" />
+        <rect x="32" y="33" width="8" height="3.5" rx="1.75" fill="var(--color-paper)" opacity="0.75" />
+        <rect x="14" y="44" width="20" height="3.5" rx="1.75" fill="var(--color-entrada)" />
       </svg>
       <span className="font-display text-lg font-semibold tracking-tight">Planner</span>
     </span>
@@ -77,6 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="mt-auto border-t border-rule pt-4">
+            <ThemeToggle className="mb-1 w-full justify-start px-3" />
             <p className="truncate px-3 text-xs text-ink-faint">{user?.email}</p>
             <button
               type="button"
@@ -93,13 +95,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="text-ink">
               <BrandMark />
             </span>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-sm px-2 py-1 text-sm text-ink-soft hover:bg-paper-sunken hover:text-ink"
-            >
-              Sair
-            </button>
+            <span className="flex items-center gap-1">
+              <ThemeToggle />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-sm px-2 py-1 text-sm text-ink-soft hover:bg-paper-sunken hover:text-ink"
+              >
+                Sair
+              </button>
+            </span>
           </header>
 
           <main className="px-4 pb-24 pt-4 sm:px-6 lg:pb-10 lg:pt-8">{children}</main>

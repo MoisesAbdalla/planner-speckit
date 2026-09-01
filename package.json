@@ -14,7 +14,8 @@
     "test:rules": "firebase emulators:exec --only firestore --project planner-rules-test \"vitest run --project rules\"",
     "test:all": "npm run test && npm run test:rules && npm run test:integration",
     "emulators": "firebase emulators:start --only auth,firestore",
-    "test:integration": "firebase emulators:exec --only auth,firestore --project planner-rules-test \"vitest run --project integration\""
+    "test:integration": "firebase emulators:exec --only auth,firestore --project planner-rules-test \"vitest run --project integration\"",
+    "validate:palette": "python3 scripts/validate-palette.py \"#2C5FA8,#C4562A,#1B8A6B,#B07C0A,#A8477E,#4F7A1F,#5B46B5,#C93F42\" --mode light --surface \"#FBF9F5\" && python3 scripts/validate-palette.py \"#5B8FD9,#CF6A3E,#239B78,#B08618,#CE6EA3,#6C9636,#8E7BE0,#D65B5D\" --mode dark --surface \"#16211D\""
   },
   "dependencies": {
     "date-fns": "^4.1.0",

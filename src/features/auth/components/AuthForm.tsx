@@ -52,10 +52,10 @@ export function AuthForm() {
       <div className="mb-8">
         <svg viewBox="0 0 64 64" className="mb-5 h-11 w-11 text-ink" aria-hidden="true">
           <rect width="64" height="64" rx="14" fill="currentColor" />
-          <rect x="14" y="22" width="36" height="3.5" rx="1.75" fill="#FBF9F5" />
-          <rect x="14" y="33" width="14" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
-          <rect x="32" y="33" width="8" height="3.5" rx="1.75" fill="#FBF9F5" opacity="0.75" />
-          <rect x="14" y="44" width="20" height="3.5" rx="1.75" fill="#4FA98F" />
+          <rect x="14" y="22" width="36" height="3.5" rx="1.75" fill="var(--color-paper)" />
+          <rect x="14" y="33" width="14" height="3.5" rx="1.75" fill="var(--color-paper)" opacity="0.75" />
+          <rect x="32" y="33" width="8" height="3.5" rx="1.75" fill="var(--color-paper)" opacity="0.75" />
+          <rect x="14" y="44" width="20" height="3.5" rx="1.75" fill="var(--color-entrada)" />
         </svg>
 
         <h1 className="text-3xl">

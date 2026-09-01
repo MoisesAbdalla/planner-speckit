@@ -10,7 +10,8 @@ import { db } from '../../../firebase';
 import { Button } from '../../../design/components/Button';
 import { Input, Select } from '../../../design/components/Field';
 import { Modal } from '../../../design/components/Modal';
-import { CATEGORY_COLORS, type Category, type CategoryKind } from '../types';
+import type { Category, CategoryKind } from '../types';
+import { categoryColor } from '../../../design/palette';
 
 interface CategoryManagerProps {
   open: boolean;
@@ -50,7 +51,6 @@ export function CategoryManager({ open, uid, categories, onClose }: CategoryMana
       await addDoc(collectionRef, {
         name: trimmed,
         kind,
-        color: CATEGORY_COLORS[categories.length % CATEGORY_COLORS.length],
         isDefault: false,
         archived: false,
         sortOrder: categories.length,
@@ -123,7 +123,10 @@ export function CategoryManager({ open, uid, categories, onClose }: CategoryMana
             <span
               aria-hidden="true"
               className="h-3 w-3 shrink-0 rounded-pill"
-              style={{ backgroundColor: category.color, opacity: category.archived ? 0.35 : 1 }}
+              style={{
+                backgroundColor: categoryColor(category.sortOrder),
+                opacity: category.archived ? 0.35 : 1,
+              }}
             />
 
             {renamingId === category.id ? (

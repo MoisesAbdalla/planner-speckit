@@ -27,7 +27,6 @@ export async function bootstrapUser(user: User): Promise<void> {
     batch.set(doc(categories), {
       name: seed.name,
       kind: seed.kind,
-      color: seed.color,
       isDefault: true,
       archived: false,
       sortOrder: index,
