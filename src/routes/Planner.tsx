@@ -8,6 +8,8 @@ import { DayView } from '../features/planner/components/DayView';
 import { WeekView } from '../features/planner/components/WeekView';
 import { MonthView } from '../features/planner/components/MonthView';
 import { TaskForm } from '../features/planner/components/TaskForm';
+import { useAssistant } from '../features/finance/AssistantContext';
+import type { ParsedTask } from '../features/finance/assistantTypes';
 import { ScopeDialog, type Scope } from '../features/planner/components/ScopeDialog';
 import { useTasks, useTaskOverrides } from '../features/planner/hooks/useTasks';
 import { usePlannedTransactions } from '../features/finance/hooks/useTransactions';
@@ -72,6 +74,17 @@ export function PlannerPage() {
     return overdue(expandTasks(tasks, overrides, lookbackFrom, addDays(anchor, -1)), anchor);
   }, [view, anchor, tasks, overrides, lookbackFrom]);
 
+  const assistente = useAssistant();
+
+  /**
+   * O rascunho de tarefa é **derivado do contexto**, não copiado para estado
+   * local: copiá-lo pediria um efeito que chama setState, e criaria duas
+   * verdades sobre o mesmo rascunho. Presente aqui significa que o formulário
+   * foi aberto pelo assistente — e é isso que distingue os dois caminhos.
+   */
+  const doAssistente = assistente?.pending?.kind === 'task' ? assistente.pending : null;
+  const prefill: ParsedTask | null = doAssistente?.reading.task ?? null;
+
   const [formOpen, setFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [scope, setScope] = useState<{
@@ -85,6 +98,15 @@ export function PlannerPage() {
   const handleSave = async (draft: TaskDraft, target: Task | null) => {
     if (target) await updateTask(uid, target.id, draft);
     else await createTask(uid, draft);
+
+    // Veio do assistente e caiu em outro dia: vai até ele. Sem isso a tarefa
+    // some da vista e o reflexo é criar de novo — a duplicata nasce da tela.
+    // O salvamento manual **não** navega, e é assim que sempre foi.
+    const dia = draft.date ?? draft.startDate;
+    if (doAssistente && dia && dia !== anchor) {
+      setAnchor(dia);
+      assistente?.setViewDate(dia);
+    }
   };
 
   const toggle = (occurrence: Occurrence) => {
@@ -137,7 +159,16 @@ export function PlannerPage() {
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-3xl">
       <header className="flex flex-col gap-3">
-        <PeriodNavigator view={view} anchor={anchor} onChange={setAnchor} />
+        <PeriodNavigator
+          view={view}
+          anchor={anchor}
+          onChange={(proximo) => {
+            setAnchor(proximo);
+            // O assistente vive fora desta página e precisa saber que dia está
+            // à vista para entender "dia 5".
+            assistente?.setViewDate(proximo);
+          }}
+        />
 
         <div className="flex items-center gap-2">
           <div className="flex flex-1 gap-1 rounded-sm bg-paper-sunken p-1">
@@ -215,10 +246,16 @@ export function PlannerPage() {
       )}
 
       <TaskForm
-        open={formOpen}
+        open={formOpen || doAssistente !== null}
         editing={editingTask}
         defaultDate={anchor}
-        onClose={() => setFormOpen(false)}
+        prefill={prefill}
+        onClose={() => {
+          setFormOpen(false);
+          // Consumir limpa o pendente: sem isso, voltar ao planner reabriria o
+          // mesmo rascunho e a pessoa criaria a tarefa duas vezes.
+          assistente?.consume();
+        }}
         onSave={handleSave}
       />
 

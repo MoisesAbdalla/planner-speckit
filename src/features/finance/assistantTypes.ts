@@ -51,9 +51,55 @@ export interface ParseContext {
 /** Descrição normalizada → id da categoria mais usada com ela. */
 export type DescriptionHistory = Record<string, string>;
 
-/** O rascunho a caminho do formulário. Efêmero: não sobrevive a um recarregamento. */
+/**
+ * O rascunho a caminho de **um dos dois** formulários.
+ *
+ * `kind` é o lado **final**, depois de a pessoa eventualmente ter trocado — e
+ * pode diferir do lado que o assistente escolheu. Cada página reage só ao seu:
+ * sem isso, chegar ao financeiro com uma tarefa pendente abriria o formulário
+ * errado, preenchido com dados que não são dele.
+ */
 export interface PendingDraft {
-  parsed: ParsedPhrase;
+  reading: PhraseReading;
+  kind: ReadingKind;
   /** A frase original, para o caminho do FR-013. */
   phrase: string;
+}
+
+/**
+ * A leitura de tarefa de uma frase.
+ *
+ * `time` é `null` sempre que a frase não trouxe **marca** de hora (`h`, `:`,
+ * `às`, `meio-dia`, `meia-noite`). Número solto nunca vira hora — é a regra
+ * que impede "paguei 15 no lanche" de virar compromisso das 15h.
+ */
+export interface ParsedTask {
+  title: string;
+  date: ISODate;
+  /** `false` quando `date` é o padrão de hoje, e não veio da frase. */
+  dateFromPhrase: boolean;
+  /** **`null` quando a frase não tinha marca de hora.** Nunca inventada. */
+  time: string | null;
+  understood: boolean;
+}
+
+/** Os dois lados que uma frase pode ter. */
+export type ReadingKind = 'transaction' | 'task';
+
+/**
+ * As duas leituras de uma frase, e qual delas foi escolhida.
+ *
+ * `transaction` é **exatamente** o que `parsePhrase` devolve — não uma cópia
+ * adaptada. É isso que faz o assistente financeiro continuar idêntico: o
+ * caminho dele chama literalmente a mesma função de antes.
+ *
+ * As duas são sempre calculadas, mesmo quando só uma será usada. É o que faz
+ * a troca ser instantânea e sem perda: não há o que reinterpretar.
+ */
+export interface PhraseReading {
+  kind: ReadingKind;
+  /** Os dois lados tinham sinal: valor em dinheiro **e** marca de lembrete. */
+  ambiguous: boolean;
+  transaction: ParsedPhrase;
+  task: ParsedTask;
 }

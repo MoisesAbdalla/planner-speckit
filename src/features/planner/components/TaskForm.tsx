@@ -4,6 +4,7 @@ import { Input } from '../../../design/components/Field';
 import { Modal } from '../../../design/components/Modal';
 import { todayISO, WEEKDAY_LABELS, type Weekday } from '../../../shared/dates';
 import type { Recur, Task, TaskDraft } from '../types';
+import type { ParsedTask } from '../../finance/assistantTypes';
 
 type Repeat = 'none' | 'daily' | 'weekly' | 'monthly';
 
@@ -11,16 +12,56 @@ interface TaskFormProps {
   open: boolean;
   editing?: Task | null;
   defaultDate?: string;
+  /** O que o assistente entendeu da frase. Ausente = caminho manual. */
+  prefill?: ParsedTask | null;
   onClose: () => void;
   onSave: (draft: TaskDraft, editing: Task | null) => Promise<void>;
 }
 
 const WEEKDAYS: Weekday[] = [1, 2, 3, 4, 5, 6, 7];
 
-function Body({ editing, defaultDate, onClose, onSave }: TaskFormProps) {
-  const [title, setTitle] = useState(editing?.title ?? '');
-  const [date, setDate] = useState(editing?.date ?? editing?.startDate ?? defaultDate ?? todayISO());
-  const [time, setTime] = useState(editing?.time ?? '');
+/**
+ * O que o assistente entendeu da frase — e o que é apenas o padrão.
+ *
+ * Sem esta linha, a data de hoje apareceria como se tivesse sido entendida da
+ * frase, e `dateFromPhrase` seria um campo criado e lido por ninguém (FR-016).
+ * Quando nada foi entendido, é ela também que avisa, em vez de abrir um
+ * formulário vazio como se tivesse funcionado.
+ */
+function LeituraDaFrase({ parsed }: { parsed: ParsedTask }) {
+  if (!parsed.understood) {
+    return (
+      <p className="rounded-sm bg-paper-sunken px-3 py-2 text-xs text-ink-soft">
+        Não entendi essa frase. Dê um nome ao item e confira a data.
+      </p>
+    );
+  }
+
+  const entendidos = [
+    parsed.title && 'o nome',
+    parsed.dateFromPhrase && 'a data',
+    parsed.time !== null && 'a hora',
+  ].filter(Boolean) as string[];
+
+  return (
+    <p className="rounded-sm bg-paper-sunken px-3 py-2 text-xs text-ink-soft">
+      <span className="text-ink">
+        Entendi {entendidos.length > 1
+          ? `${entendidos.slice(0, -1).join(', ')} e ${entendidos[entendidos.length - 1]}`
+          : (entendidos[0] ?? 'pouca coisa')}
+        .
+      </span>
+      {!parsed.dateFromPhrase && ' A data é hoje, por padrão — confira.'}
+    </p>
+  );
+}
+
+function Body({ editing, defaultDate, prefill, onClose, onSave }: TaskFormProps) {
+  const [title, setTitle] = useState(editing?.title ?? prefill?.title ?? '');
+  const [date, setDate] = useState(
+    editing?.date ?? editing?.startDate ?? prefill?.date ?? defaultDate ?? todayISO(),
+  );
+  const [time, setTime] = useState(editing?.time ?? prefill?.time ?? '');
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [repeat, setRepeat] = useState<Repeat>(editing?.recurrence?.freq ?? 'none');
   const [weekdays, setWeekdays] = useState<Weekday[]>(
@@ -94,6 +135,8 @@ function Body({ editing, defaultDate, onClose, onSave }: TaskFormProps) {
       }
     >
       <form id="task-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {prefill && <LeituraDaFrase parsed={prefill} />}
+
         <Input
           label="O que você vai fazer"
           placeholder="Academia, estudar inglês, pagar aluguel…"
@@ -203,5 +246,11 @@ function Body({ editing, defaultDate, onClose, onSave }: TaskFormProps) {
 
 export function TaskForm(props: TaskFormProps) {
   if (!props.open) return null;
-  return <Body key={props.editing?.id ?? `novo:${props.defaultDate ?? ''}`} {...props} />;
+  // A identidade do rascunho entra na `key`: sem ela, duas tarefas seguidas
+  // pelo assistente reaproveitam o corpo montado e a segunda aparece com os
+  // campos da primeira.
+  const identidade = props.prefill
+    ? [props.prefill.title, props.prefill.date, props.prefill.time].join('|')
+    : (props.defaultDate ?? '');
+  return <Body key={props.editing?.id ?? `novo:${identidade}`} {...props} />;
 }

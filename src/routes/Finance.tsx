@@ -65,8 +65,12 @@ export function FinancePage() {
    * rascunho. Presente aqui significa: o formulário foi aberto pelo
    * assistente, e é isso que distingue os dois caminhos.
    */
-  const doAssistente = assistente?.pending ?? null;
-  const prefill: ParsedPhrase | null = doAssistente?.parsed ?? null;
+  // **Só o lado de lançamento.** Sem esse filtro, chegar aqui com uma tarefa
+  // pendente abriria o formulário errado, preenchido com dados que não são
+  // dele — e a pessoa gravaria um gasto no lugar de um lembrete.
+  const doAssistente =
+    assistente?.pending?.kind === 'transaction' ? assistente.pending : null;
+  const prefill: ParsedPhrase | null = doAssistente?.reading.transaction ?? null;
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState<Transaction | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);

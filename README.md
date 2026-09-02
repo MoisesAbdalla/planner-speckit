@@ -193,9 +193,32 @@ medir o acerto frase a frase, contra um conjunto fixo em
 frases sem número — este sem tolerância nenhuma. Categoria errada custa um
 toque de correção; valor inventado corrompe o saldo em silêncio.
 
+**O assistente lê a frase dos dois lados.** Ele produz sempre **duas
+leituras** — lançamento e tarefa — e diz embaixo do campo, enquanto você
+escreve, qual escolheu. Continuar abre o formulário correspondente, já
+preenchido. Como as duas leituras já existem, trocar de lado custa um toque e
+não reinterpreta nada.
+
+O lado é decidido por uma tabela pequena: marca de lembrete ou hora do dia sem
+valor é **tarefa**; valor sem esses sinais é **lançamento**; os dois juntos é
+**ambíguo**, e aí ele diz que está em dúvida em vez de escolher calado. Sem
+sinal nenhum (`mercado`) continua sendo lançamento — mudar isso seria
+regressão para quem já usa o assistente.
+
+**Número solto nunca é hora.** A hora exige marca (`às 7h`, `15h30`,
+`meio-dia`), e é essa regra que mantém `paguei 15 no lanche` como dinheiro e
+`reunião às 15h` como compromisso. Os dois textos contêm `15`.
+
+**`parsePhrase` não foi alterada quando o planner entrou.** A leitura nova
+envolve a antiga em vez de estendê-la, então "o assistente financeiro continua
+igual" não é um teste que a gente torce para passar: o caminho financeiro
+chama literalmente a mesma função. Um teste confere isso frase a frase sobre
+as 45 do conjunto original, que também não mudou.
+
 **A ordem de extração da frase importa**: a data sai antes do valor. Invertida,
 o `5` de "gastei 20 dia 5" viraria R$ 5,00, e a frase continuaria parecendo
-certa.
+certa. A hora entra entre as duas pelo mesmo motivo: sem sair antes,
+`reunião às 15h` viraria um gasto de R$ 15,00.
 
 **A voz é do navegador** (Web Speech API): nenhuma dependência, nenhuma chave,
 nenhum serviço nosso. Onde o navegador não a oferece — Firefox, hoje — o

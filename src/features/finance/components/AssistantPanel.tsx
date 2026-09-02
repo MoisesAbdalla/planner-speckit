@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Button } from '../../../design/components/Button';
 import { Modal } from '../../../design/components/Modal';
-import { todayISO } from '../../../shared/dates';
+import { monthOf, todayISO } from '../../../shared/dates';
 import { useAssistant } from '../AssistantContext';
 import { useSpeechRecognition, SPEECH_ERROR_MESSAGES } from '../../../shared/useSpeechRecognition';
-import { parsePhrase } from '../lib/phraseParser';
+import { readPhrase } from '../lib/phraseReading';
+import type { ReadingKind } from '../assistantTypes';
 
 /**
  * O assistente: uma linha do livro-caixa sendo escrita.
@@ -15,58 +16,74 @@ import { parsePhrase } from '../lib/phraseParser';
  * que pulsa: o app não ganha um vocabulário novo para dizer "estou ouvindo".
  *
  * **Este componente não grava nada.** Ele produz um rascunho e o entrega ao
- * formulário, que é quem grava. Se algum dia parecer conveniente chamar
- * `createTransaction` daqui, isso é violação do FR-010 e do FR-012.
+ * formulário — de lançamento ou de tarefa —, que é quem grava. Se algum dia
+ * parecer conveniente chamar `createTransaction` ou `createTask` daqui, isso é
+ * violação do FR-013, não uma simplificação.
  */
 export function AssistantPanel() {
   const assistente = useAssistant();
   const navigate = useNavigate();
   const location = useLocation();
   const [frase, setFrase] = useState('');
+  /** `null` = seguir o lado que o assistente escolheu; preenchido = a pessoa trocou. */
+  const [ladoEscolhido, setLadoEscolhido] = useState<ReadingKind | null>(null);
   const campoRef = useRef<HTMLInputElement>(null);
-  // A transcrição cai no campo e fica editável antes de virar rascunho
-  // (FR-015): quem falou errado corrige em vez de recomeçar.
   const voz = useSpeechRecognition((texto) => setFrase(texto));
 
   const aberto = assistente?.open ?? false;
+  const noPlanner = location.pathname.startsWith('/planner');
+  const texto = voz.listening && voz.transcript ? voz.transcript : frase;
 
   useEffect(() => {
     if (aberto) campoRef.current?.focus();
   }, [aberto]);
 
+  /**
+   * A leitura é refeita a cada tecla, sem _debounce_.
+   *
+   * É aritmética sobre uma frase de até 140 caracteres — o atraso só criaria
+   * um intervalo em que a linha abaixo do campo discorda do texto na tela,
+   * que é pior do que o problema que resolveria.
+   *
+   * O período vem do lugar certo: no planner, do dia em exibição; fora dele,
+   * do mês do financeiro. Sem essa regra, "dia 5" escrito no planner em agosto
+   * viraria 5 de setembro se o financeiro estivesse em setembro — calado.
+   */
+  const leitura = useMemo(() => {
+    if (!assistente || !texto.trim()) return null;
+    return readPhrase(texto, {
+      categories: assistente.categories,
+      history: assistente.history,
+      today: todayISO(),
+      viewMonth: noPlanner ? monthOf(assistente.viewDate) : assistente.viewMonth,
+    });
+  }, [assistente, texto, noPlanner]);
+
   if (!assistente || !aberto) return null;
+
+  const lado: ReadingKind = ladoEscolhido ?? leitura?.kind ?? 'transaction';
 
   const fechar = () => {
     voz.stop();
     setFrase('');
+    setLadoEscolhido(null);
     assistente.setOpen(false);
   };
 
-  const interpretar = () => {
-    const texto = frase.trim();
-    if (!texto) return;
+  const continuar = () => {
+    if (!leitura || !texto.trim()) return;
     voz.stop();
 
-    const parsed = parsePhrase(texto, {
-      categories: assistente.categories,
-      history: assistente.history,
-      today: todayISO(),
-      viewMonth: assistente.viewMonth,
-    });
-
-    // Frase não entendida ainda vira rascunho: o formulário abre com o texto
-    // na descrição e diz que não entendeu, em vez de falhar em silêncio (FR-013).
-    assistente.setPending({
-      parsed: parsed.understood ? parsed : { ...parsed, description: texto },
-      phrase: texto,
-    });
+    assistente.setPending({ reading: leitura, kind: lado, phrase: texto.trim() });
 
     setFrase('');
+    setLadoEscolhido(null);
     assistente.setOpen(false);
 
-    // O formulário mora na página financeira. Aberto de outra tela, o rascunho
-    // fica esperando e ela o consome ao montar (FR-026).
-    if (location.pathname !== '/financas') navigate('/financas');
+    // Cada formulário mora na sua página. Aberto de outra tela, o rascunho
+    // fica esperando e a página o consome ao montar (FR-017).
+    const destino = lado === 'task' ? '/planner/dia' : '/financas';
+    if (!location.pathname.startsWith(destino)) navigate(destino);
   };
 
   return (
@@ -79,16 +96,15 @@ export function AssistantPanel() {
           <Button variant="secondary" onClick={fechar}>
             Cancelar
           </Button>
-          <Button onClick={interpretar} disabled={!frase.trim()}>
+          <Button onClick={continuar} disabled={!texto.trim()}>
             Continuar
           </Button>
         </>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* A régua: o texto pousa nela, como uma linha nova do livro-caixa.
-            Ouvindo, é a própria régua que pulsa — o app não ganha um
-            vocabulário novo só para dizer "estou escutando". */}
+            Ouvindo, é a própria régua que pulsa. */}
         <div
           className={`flex items-center gap-2 border-b pb-2 transition-colors duration-[--ease-base] ${
             voz.listening ? 'animate-pulse border-acao' : 'border-rule-strong'
@@ -96,27 +112,30 @@ export function AssistantPanel() {
         >
           <input
             ref={campoRef}
-            value={voz.listening && voz.transcript ? voz.transcript : frase}
-            onChange={(e) => setFrase(e.target.value)}
+            value={texto}
+            onChange={(e) => {
+              setFrase(e.target.value);
+              // Trocar de frase descarta a escolha anterior: o lado passa a
+              // ser o que a leitura nova disser.
+              setLadoEscolhido(null);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
-                interpretar();
+                continuar();
               }
             }}
             placeholder="20 no mercado"
             maxLength={140}
-            aria-label="Escreva o lançamento em uma frase"
+            aria-label="Escreva o lançamento ou a tarefa em uma frase"
             className="w-full bg-transparent text-lg text-ink outline-none placeholder:text-ink-faint"
           />
 
-          {/* O microfone só existe onde o navegador o oferece (FR-014). Um
-              botão cinza que não faz nada parece defeito do app. */}
           {voz.supported && (
             <button
               type="button"
               onClick={() => (voz.listening ? voz.stop() : voz.start())}
-              aria-label={voz.listening ? 'Parar de ouvir' : 'Falar o lançamento'}
+              aria-label={voz.listening ? 'Parar de ouvir' : 'Falar'}
               aria-pressed={voz.listening}
               className={`shrink-0 rounded-full p-2 transition-colors duration-[--ease-snap] ${
                 voz.listening ? 'bg-acao text-paper' : 'text-ink-soft hover:bg-paper-sunken'
@@ -129,6 +148,8 @@ export function AssistantPanel() {
             </button>
           )}
         </div>
+
+        {leitura && <LinhaDeLeitura lado={lado} ambigua={leitura.ambiguous} onTrocar={setLadoEscolhido} />}
 
         {voz.listening && (
           <p role="status" className="text-xs text-acao">
@@ -143,11 +164,53 @@ export function AssistantPanel() {
         )}
 
         <p className="text-xs text-ink-faint">
-          Também entende <span className="text-ink-soft">salário 3200</span> e{' '}
-          <span className="text-ink-soft">paguei 47,90 no posto ontem</span>. O que faltar, você
-          completa no formulário.
+          Entende <span className="text-ink-soft">salário 3200</span>,{' '}
+          <span className="text-ink-soft">47,90 no posto ontem</span> e{' '}
+          <span className="text-ink-soft">dentista sexta às 9h</span>. O que faltar, você completa
+          no formulário.
         </p>
       </div>
     </Modal>
+  );
+}
+
+/**
+ * O que o assistente entendeu, e a saída quando ele erra.
+ *
+ * A frase confiante e a ambígua são ditas de formas diferentes de propósito:
+ * dizer a mesma coisa nos dois casos desperdiçaria a única informação que faz
+ * a pessoa olhar antes de confirmar justamente quando olhar vale a pena.
+ *
+ * A troca está disponível **sempre**, e não só nas ambíguas — o assistente
+ * também erra com convicção, e sem ela a correção custaria apagar tudo e
+ * reescrever.
+ */
+function LinhaDeLeitura({
+  lado,
+  ambigua,
+  onTrocar,
+}: {
+  lado: ReadingKind;
+  ambigua: boolean;
+  onTrocar: (lado: ReadingKind) => void;
+}) {
+  const outro: ReadingKind = lado === 'task' ? 'transaction' : 'task';
+  const nome = (k: ReadingKind) => (k === 'task' ? 'tarefa' : 'lançamento');
+
+  return (
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+      <span className={ambigua ? 'text-atencao' : 'text-ink-soft'}>
+        {ambigua ? 'Pode ser tarefa ou lançamento.' : `Entendi como ${nome(lado)}.`}
+      </span>
+      <button
+        type="button"
+        onClick={() => onTrocar(outro)}
+        className={`rounded-sm underline underline-offset-2 transition-colors duration-[--ease-snap] ${
+          ambigua ? 'font-medium text-atencao hover:text-ink' : 'text-ink-faint hover:text-ink'
+        }`}
+      >
+        {ambigua ? `É ${nome(outro)}` : `Trocar para ${nome(outro)}`}
+      </button>
+    </p>
   );
 }

@@ -3,7 +3,7 @@ import { useCategories } from './hooks/useCategories';
 import { useDescriptionHistory } from './hooks/useDescriptionHistory';
 import type { DescriptionHistory, PendingDraft } from './assistantTypes';
 import type { Category } from './types';
-import { currentMonth, type ISOMonth } from '../../shared/dates';
+import { currentMonth, todayISO, type ISODate, type ISOMonth } from '../../shared/dates';
 
 /**
  * A ponte entre o assistente e o formulário.
@@ -37,6 +37,13 @@ interface AssistantValue {
    */
   viewMonth: ISOMonth;
   setViewMonth: (month: ISOMonth) => void;
+  /**
+   * O dia em exibição no planner. Existe pela mesma razão que `viewMonth`:
+   * "dia 5" precisa do período que a pessoa está olhando, e o painel vive
+   * fora das duas páginas.
+   */
+  viewDate: ISODate;
+  setViewDate: (date: ISODate) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
@@ -47,6 +54,7 @@ export function AssistantProvider({ uid, children }: { uid: string; children: Re
   const [pending, setPendingState] = useState<PendingDraft | null>(null);
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState<ISOMonth>(() => currentMonth());
+  const [viewDate, setViewDate] = useState<ISODate>(() => todayISO());
 
   /**
    * As categorias são carregadas **aqui**, e não na página financeira.
@@ -103,10 +111,12 @@ export function AssistantProvider({ uid, children }: { uid: string; children: Re
       history,
       viewMonth,
       setViewMonth,
+      viewDate,
+      setViewDate,
       open,
       setOpen: abrir,
     }),
-    [pending, setPending, consume, categories, history, viewMonth, open, abrir],
+    [pending, setPending, consume, categories, history, viewMonth, viewDate, open, abrir],
   );
 
   return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
