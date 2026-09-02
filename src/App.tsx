@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { AppShell } from './design/components/AppShell';
+import { AssistantProvider } from './features/finance/AssistantContext';
 import { AuthForm } from './features/auth/components/AuthForm';
 import { FinancePage } from './routes/Finance';
 import { PlannerPage } from './routes/Planner';
@@ -45,7 +46,13 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" replace />;
-  return <AppShell>{children}</AppShell>;
+  // O provider fica dentro do RequireAuth: o assistente existe em toda tela
+  // autenticada e em nenhuma outra — a tela de login não tem o que lançar.
+  return (
+    <AssistantProvider uid={user.uid}>
+      <AppShell>{children}</AppShell>
+    </AssistantProvider>
+  );
 }
 
 function LoginRoute() {

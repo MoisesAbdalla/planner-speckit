@@ -6,6 +6,8 @@ import { MonthNavigator } from '../features/finance/components/MonthNavigator';
 import { MonthSummary } from '../features/finance/components/MonthSummary';
 import { TransactionList } from '../features/finance/components/TransactionList';
 import { TransactionForm } from '../features/finance/components/TransactionForm';
+import { useAssistant } from '../features/finance/AssistantContext';
+import type { ParsedPhrase } from '../features/finance/assistantTypes';
 import { CategoryManager } from '../features/finance/components/CategoryManager';
 import { RecurrenceList } from '../features/finance/components/RecurrenceList';
 import { RecurrenceForm } from '../features/finance/components/RecurrenceForm';
@@ -30,6 +32,7 @@ import type { Recurrence, Transaction, TransactionDraft } from '../features/fina
 export function FinancePage() {
   const uid = useUid();
   const [month, setMonth] = useState<ISOMonth>(currentMonth());
+  const assistente = useAssistant();
 
   const { transactions, loading, error } = useTransactions(uid, month);
   const { categories, loading: loadingCategories } = useCategories(uid);
@@ -54,6 +57,16 @@ export function FinancePage() {
   }, [categories, forCategory]);
 
   const [formOpen, setFormOpen] = useState(false);
+
+  /**
+   * O rascunho do assistente é **derivado do contexto**, não copiado para um
+   * estado local. Copiá-lo pediria um efeito que chama setState — a regra que
+   * este projeto já aprendeu a evitar — e criaria duas verdades sobre o mesmo
+   * rascunho. Presente aqui significa: o formulário foi aberto pelo
+   * assistente, e é isso que distingue os dois caminhos.
+   */
+  const doAssistente = assistente?.pending ?? null;
+  const prefill: ParsedPhrase | null = doAssistente?.parsed ?? null;
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState<Transaction | null>(null);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -68,6 +81,17 @@ export function FinancePage() {
     // daquele mês, e a recorrência em si não é tocada (FR-010).
     if (target) await updateTransaction(uid, target, draft);
     else await createTransaction(uid, draft);
+
+    // Veio do assistente e caiu em outro mês: vai até lá.
+    //
+    // No dia 1º, "gastei 20 ontem" grava no mês anterior e some da vista; o
+    // reflexo é lançar de novo, e a duplicata nasce da tela, não do app. O
+    // salvamento manual **não** navega — mudar isso seria mexer no caminho
+    // manual, que o FR-021 protege.
+    if (doAssistente && draft.month !== month) {
+      setMonth(draft.month);
+      assistente?.setViewMonth(draft.month);
+    }
   };
 
   const openNew = () => {
@@ -83,7 +107,15 @@ export function FinancePage() {
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-3xl">
       <header className="flex flex-col gap-3">
-        <MonthNavigator month={month} onChange={setMonth} />
+        <MonthNavigator
+          month={month}
+          onChange={(proximo) => {
+            setMonth(proximo);
+            // O assistente vive fora desta página e precisa saber que mês
+            // está à vista para entender "dia 5" (R4).
+            assistente?.setViewMonth(proximo);
+          }}
+        />
 
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={openNew} size="sm">
@@ -160,10 +192,19 @@ export function FinancePage() {
       </section>
 
       <TransactionForm
-        open={formOpen}
+        open={formOpen || doAssistente !== null}
         categories={categories}
         editing={editing}
-        onClose={() => setFormOpen(false)}
+        prefill={prefill}
+        // Só o caminho do assistente pede categoria explícita, e só quando ele
+        // não reconheceu nenhuma: reconhecida, ela vem escolhida (FR-008a).
+        requireExplicitCategory={prefill !== null && prefill.categoryId === null}
+        onClose={() => {
+          setFormOpen(false);
+          // Consumir limpa o pendente: sem isso, voltar ao financeiro
+          // reabriria o mesmo rascunho e a pessoa gravaria duas vezes.
+          assistente?.consume();
+        }}
         onSave={handleSave}
       />
 

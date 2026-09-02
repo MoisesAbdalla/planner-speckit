@@ -4,6 +4,8 @@ import { useAuth } from '../../features/auth/AuthContext';
 import { useOnlineStatus } from '../../shared/connection';
 import { SetupBanner } from './SetupBanner';
 import { ThemeToggle } from './ThemeToggle';
+import { AssistantFab, AssistantRailButton } from '../../features/finance/components/AssistantButton';
+import { AssistantPanel } from '../../features/finance/components/AssistantPanel';
 
 const NAV = [
   { to: '/planner/dia', label: 'Hoje', short: 'Hoje' },
@@ -61,7 +63,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <BrandMark />
           </div>
 
-          <nav className="mt-8 flex flex-col gap-1">
+          <AssistantRailButton className="mt-8" />
+
+          <nav className="mt-2 flex flex-col gap-1">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
@@ -130,6 +134,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </ul>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
+
+      <AssistantFab />
+      <AssistantPanel />
     </div>
   );
 }

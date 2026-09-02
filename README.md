@@ -179,6 +179,31 @@ resultado todo documento que não tem o campo ordenado — ordenar por
 `dayOfMonth` tornava a recorrência semanal invisível, cadastrada com sucesso e
 nunca exibida. A ordenação é feita em memória.
 
+**O assistente de frase não grava nada.** Escrever "20 no mercado" produz um
+rascunho — valor, tipo, categoria, data e descrição — que é entregue ao
+**formulário de lançamento já existente**, onde você confere e salva. Não há
+um segundo caminho de gravação, então "grava igual ao manual" não é um
+comportamento a manter em dia: é o único que existe.
+
+O interpretador é puro (`lib/phraseParser.ts` e auxiliares): não importa
+Firebase e não lê o relógio — a data de hoje é injetada. Isso é o que permite
+medir o acerto frase a frase, contra um conjunto fixo em
+`tests/unit/fixtures/phrases.ts`. Dois critérios com forças diferentes:
+**90% de acerto** em valor, tipo e data, e **zero valores inventados** em
+frases sem número — este sem tolerância nenhuma. Categoria errada custa um
+toque de correção; valor inventado corrompe o saldo em silêncio.
+
+**A ordem de extração da frase importa**: a data sai antes do valor. Invertida,
+o `5` de "gastei 20 dia 5" viraria R$ 5,00, e a frase continuaria parecendo
+certa.
+
+**A voz é do navegador** (Web Speech API): nenhuma dependência, nenhuma chave,
+nenhum serviço nosso. Onde o navegador não a oferece — Firefox, hoje — o
+microfone simplesmente não aparece e o campo de texto responde por tudo. O app
+não grava nem guarda áudio; vale dizer, porém, que **no Chrome o áudio trafega
+até os servidores do Google** para virar texto. É do navegador, não do app,
+mas chamar isso de "tudo local" seria falso.
+
 **Excluir um previsto registra o descarte na recorrência** (campo `skips`).
 Sem isso, a geração não encontraria o documento apagado e o recriaria na
 próxima vez que o mês fosse preparado.
