@@ -116,10 +116,10 @@ sendo testável de forma independente; ela só não tem código novo.
 - [X] T030 [P] Conferir que nenhum arquivo do assistente chama `createTask`, `createTransaction` ou qualquer escrita: a fronteira do FR-013 vale igual para o lado novo
 - [X] T030a [P] Conferir que a voz **não tem caminho separado** (FR-020): a transcrição cai no mesmo campo e passa pelo mesmo `readPhrase`, sem ramo próprio para tarefa
 - [X] T031 Rodar a suíte completa (`npm test`, `npm run test:rules`, `npm run test:integration`), o lint, o `tsc -b` e o build
-- [ ] T032 Executar o bloco 1 de quickstart.md — a regressão do assistente financeiro — **antes** de escrever a primeira frase de tarefa
-- [ ] T033 Executar os blocos 2 a 7 de quickstart.md, nos dois temas e nas duas larguras
+- [X] T032 Executar o bloco 1 de quickstart.md — a regressão do assistente financeiro — **antes** de escrever a primeira frase de tarefa
+- [X] T033 Executar os blocos 2 a 7 de quickstart.md, nos dois temas e nas duas larguras
 - [X] T034 [P] Atualizar README.md com as duas leituras, a regra de que número solto nunca é hora, e o fato de `parsePhrase` seguir intocada
-- [ ] T035 Publicar apenas o hosting (`firebase deploy --only hosting`) — esta feature **não** altera regras do Firestore
+- [X] T035 Publicar apenas o hosting (`firebase deploy --only hosting`) — esta feature **não** altera regras do Firestore
 
 ---
 
