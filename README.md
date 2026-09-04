@@ -242,6 +242,23 @@ mudanças sobem quando a internet voltar. Sem isso, a promessa do banner de
 offline valia só enquanto a aba ficasse aberta: recarregar sem internet dava
 tela vazia.
 
+**E o próprio app é guardado por um service worker** (`public/sw.js`), porque
+o cache de dados sozinho não bastava: sem ele o navegador ainda precisava
+buscar o `index.html` e os scripts na rede para o app começar, e offline
+falhava antes de chegar aos dados. O Firebase servia tudo com uma hora de
+cache, então o app instalado abria offline por uma hora e depois não abria
+mais.
+
+O service worker trata as duas armadilhas clássicas de propósito: **navegação
+é rede primeiro** (cache só como rede de segurança, para nunca prender ninguém
+numa versão velha) e **só requisições GET da mesma origem passam por ele** —
+Firestore e login vão direto para a rede, sempre. Os arquivos de `/assets/`
+usam cache primeiro, seguro porque o nome deles carrega o hash do conteúdo.
+
+Os cabeçalhos do Hosting acompanham (`firebase.json`): `/assets/**` dura um
+ano e é imutável; `index.html` e `sw.js` não são cacheados, porque são eles
+que decidem qual versão você está usando.
+
 Duas ressalvas honestas: o cache **não é retroativo** — ele se enche conforme
 o app é usado com internet, então a primeira abertura offline ainda mostra
 pouco; e ele custa cerca de 77 KB no primeiro download, que é o código de

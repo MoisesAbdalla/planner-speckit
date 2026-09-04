@@ -30,4 +30,11 @@ export default tseslint.config(
     files: ['tests/**/*.{ts,tsx}', 'vite.config.ts', 'vitest.config.ts'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
+  {
+    // O service worker roda noutro contexto: `self`, `caches` e `fetch` são
+    // dele, não da janela. Ensinar isso ao ESLint é melhor do que silenciar
+    // os avisos — assim um erro de verdade nesse arquivo continua aparecendo.
+    files: ['public/sw.js'],
+    languageOptions: { globals: globals.serviceworker },
+  },
 );
