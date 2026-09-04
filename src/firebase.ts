@@ -1,6 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  connectFirestoreEmulator,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore';
 
 /*
  * Sobre o `authDomain`: seria tentador usar o domínio do próprio site (o
@@ -46,7 +51,35 @@ export const app = initializeApp(
   isConfigured ? config : { apiKey: 'sem-configuracao', projectId: 'sem-configuracao' },
 );
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+/**
+ * O cache persistente existe porque o app **promete** funcionar sem conexão.
+ *
+ * O banner de offline diz "pode continuar usando — as mudanças sobem quando a
+ * internet voltar". Sem cache persistente isso valia só enquanto a aba ficasse
+ * aberta: recarregar sem internet, ou abrir o app do zero no metrô, mostrava
+ * tela vazia. A promessa estava na tela e não no código.
+ *
+ * `persistentMultipleTabManager` porque o Firestore recusa cache persistente
+ * em várias abas sem um gerente entre elas — e app instalado no celular mais
+ * aba aberta no PC é o uso normal aqui, não a exceção.
+ *
+ * **O cache não é retroativo**: ele se enche conforme o app é usado com
+ * internet. A primeira abertura offline depois desta mudança ainda mostra
+ * pouco.
+ */
+const suportaCachePersistente =
+  typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+
+export const db = initializeFirestore(
+  app,
+  // Node (testes de integração) e jsdom não têm IndexedDB. Pedir cache
+  // persistente ali derrubaria a suíte por um recurso que só faz sentido no
+  // navegador de verdade.
+  suportaCachePersistente
+    ? { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }
+    : {},
+);
 
 if (isConfigured && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });

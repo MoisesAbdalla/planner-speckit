@@ -235,5 +235,21 @@ próxima vez que o mês fosse preparado.
 memória e só vira documento quando você mexe naquele dia (concluir, editar,
 excluir) — do contrário, um hábito diário criaria milhares de registros.
 
+**O app funciona sem conexão porque guarda os dados no aparelho.** O Firestore
+é inicializado com cache persistente e gerente de múltiplas abas
+(`src/firebase.ts`), então abrir o app offline mostra o que você já viu, e as
+mudanças sobem quando a internet voltar. Sem isso, a promessa do banner de
+offline valia só enquanto a aba ficasse aberta: recarregar sem internet dava
+tela vazia.
+
+Duas ressalvas honestas: o cache **não é retroativo** — ele se enche conforme
+o app é usado com internet, então a primeira abertura offline ainda mostra
+pouco; e ele custa cerca de 77 KB no primeiro download, que é o código de
+persistência do Firestore.
+
+Em ambiente sem IndexedDB (Node dos testes de integração, jsdom) o cache é
+desligado por uma guarda explícita — pedi-lo ali derrubaria a suíte por um
+recurso que só existe no navegador.
+
 **Os agregados usam `increment()` do Firestore.** Ler-somar-gravar perderia uma
 confirmação quando dois aparelhos gravam ao mesmo tempo.
