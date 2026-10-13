@@ -1,3 +1,38 @@
+# Planner (Spec Kit edition) — built with Spec-Driven Development
+
+> Routine planner + personal finance manager built feature by feature with **Spec Kit + Claude Code**.
+> 🇧🇷 Full documentation in Portuguese below.
+
+**Stack:** React 19 · TypeScript · Vite · Tailwind CSS · Firebase (Auth, Firestore, Hosting) · Vitest · Firestore Security Rules tests
+
+**Features:** income/expense tracking with monthly summary · budget goals as a timeline (changing
+a goal never rewrites how past months were judged) · weekly/monthly/yearly recurrences with
+deterministic IDs (no duplicates across devices, no Cloud Functions) · day/week/month routine views
+· dark mode with a color-blind-validated category palette · offline support · a **natural-language
+quick-entry assistant** ("20 no mercado" → pre-filled entry) measured against a fixed phrase set
+(≥90% accuracy, **zero invented amounts**).
+
+**Specs:** see [`specs/`](specs/) — six features, each with spec, plan, research, data model, contracts and tasks.
+
+## Same product, two AI development methodologies
+
+I built the **same app** — a routine planner with a built-in personal finance manager (React,
+TypeScript, Firebase) — twice, with Claude Code driving the implementation, to compare two
+structured ways of building software with AI agents:
+
+| | [Spec Kit](https://github.com/MoisesAbdalla/planner-speckit) (Spec-Driven Development) | [GSD](https://github.com/MoisesAbdalla/planner-gsd) (Get Shit Done) |
+|---|---|---|
+| Unit of work | A **feature spec** per capability | A **roadmap phase** with several plans |
+| Cycle | `specify → plan → tasks → implement` | `discuss → research → plan → execute → review → verify (UAT)` |
+| Artifacts | `spec.md`, `plan.md`, `research.md`, `data-model.md`, contracts, checklists, `tasks.md` | `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, per-phase context, research, UI spec, plans + summaries, code review, UAT, verification |
+| Where it got | **6 features shipped**, 268 traceable tasks, ~8.8k lines of TS in 5 days | **Phase 1 of 6** (access + shared workspace) with a full review/verification loop in 3 days |
+| Strength | Fast, linear delivery of many features with versioned, auditable specs | Deeper up-front discovery and a built-in review → fix → verify loop per phase |
+
+The specs and planning artifacts are committed alongside the code, so the history shows *why*
+each decision was made — not only what changed.
+
+---
+
 # Planner
 
 Planner de rotina com gestor financeiro embutido. Registre gastos e ganhos,
